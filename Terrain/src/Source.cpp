@@ -22,6 +22,7 @@
 // settings
 const unsigned int SCR_WIDTH = 1200;
 const unsigned int SCR_HEIGHT = 900;
+glm::vec3 dirLightPos(.7f, -.6f, .2f);
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -31,6 +32,8 @@ void processInput(GLFWwindow *window);
 unsigned int loadTexture(char const * path);
 //unsigned int loadTexture2(char const * path);
 void setVAO(vector <float> vertices);
+
+void setLightUniforms(Shader& shader);
 
 // camera
 Camera camera(glm::vec3(260,50,300));
@@ -74,15 +77,14 @@ int main()
 	glCullFace(GL_BACK);
 
 	// simple vertex and fragment shader - add your own tess and geo shader
-	Shader shader("..\\shaders\\plainVert.vs", "..\\shaders\\plainFrag.fs");
-
+	Shader shader("..\\shaders\\tessVert.vs", "..\\shaders\\phongDirFrag.fs", nullptr, "..\\shaders\\tessControlShader.tcs", "..\\shaders\\tessEvaluationShader.tes");
+	unsigned int heightMap = loadTexture("..\\resources\\Path\\Stone_Path_005_Height.png");
 
 	//Terrain Constructor ; number of grids in width, number of grids in height, gridSize
 	Terrain terrain(50, 50,10);
 	terrainVAO = terrain.getVAO();
 
-	
-
+	setLightUniforms(shader);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -101,10 +103,14 @@ int main()
 	    shader.setMat4("projection", projection);
 		shader.setMat4("view", view);
 		shader.setMat4("model", model);
+		shader.setVec3("viewPos", camera.Position);
+		shader.setInt("heightMap", 0);
+		//shader.setInt("normalMap", 1);
+		shader.setInt("scale", 25);
 	
 		glBindVertexArray(terrainVAO);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glDrawArrays(GL_TRIANGLES, 0, terrain.getSize());
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glDrawArrays(GL_PATCHES, 0, terrain.getSize());
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -207,6 +213,21 @@ unsigned int loadTexture(char const * path)
 	}
 
 	return textureID;
+}
+
+void setLightUniforms(Shader& tess) {
+	tess.use();
+	//light properties
+	tess.setVec3("dirLight.direction", dirLightPos);
+	tess.setVec3("dirLight.ambient", 0.5f, 0.5f, 0.5f);
+	tess.setVec3("dirLight.diffuse", 0.55f, 0.55f, 0.55f);
+	tess.setVec3("dirLight.specular", 0.6f, 0.6f, 0.6f);
+	//material properties
+	tess.setVec3("mat.ambient", 0.3, 0.387, 0.317);
+	tess.setVec3("mat.diffuse", 0.396, 0.741, 0.691);
+	tess.setVec3("mat.specular", 0.297f, 0.308f, 0.306f);
+	tess.setFloat("mat.shininess", 0.9f);
+
 }
 
 

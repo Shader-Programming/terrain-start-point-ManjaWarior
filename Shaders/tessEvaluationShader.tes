@@ -1,0 +1,68 @@
+#version 450 core
+
+// reading in a triangle, split tesselated triangels evenly in a counter-clockwise direction (ccw)
+layout(triangles, equal_spacing, ccw) in;
+
+// forward declare functions to perfrom interpolation with the barycentric coordinates from the Primitive Generator
+vec2 interpolate2D(vec2 v0, vec2 v1, vec2 v2) ;
+vec3 interpolate3D(vec3 v0, vec3 v1, vec3 v2) ;
+
+
+// unifrom matrices to perform transformations
+// previously this would have been done in vertex shader
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+
+uniform sampler2D heightMap;
+uniform int scale;
+
+// read in vector arrays from previous shader
+in vec3 posTC[] ;
+in vec2 texCoordsTC[] ;
+
+// pass along the interpolated values
+out vec2 texCoordsES ;
+out vec3 posES ;
+out vec3 normalsES ;
+
+
+
+void main()
+{
+    // interpolate the normal and xyz position using the linear interpolation function
+    // use 3D because they are in three dimensions; 2D also included for uv texture coordinates
+
+   texCoordsES = interpolate2D(texCoordsTC[0], texCoordsTC[1], texCoordsTC[2]) ;
+   posES = interpolate3D(posTC[0], posTC[1], posTC[2]) ;
+   
+   float height = texture(heightMap, texCoordsES).x;
+   posES.y = height * scale;
+   
+   float right = (textureOffset(heightMap, texCoordsES, ivec2(1,0)).r) * scale;
+   float left = (textureOffset(heightMap, texCoordsES, ivec2(-1,0)).r) * scale;
+   float up = (textureOffset(heightMap, texCoordsES, ivec2(0,1)).r) * scale;
+   float down = (textureOffset(heightMap, texCoordsES, ivec2(0,-1)).r) * scale;
+   
+   float lr = left - right;
+   float ud = up - down;
+   normalsES = normalize(vec3(lr, 2.0, ud));//central difference method for normals
+   
+
+   // transform vertex to clip space
+	gl_Position = projection * view * model *vec4(posES, 1.0);
+
+} 
+
+
+//basic linear interpolation
+vec2 interpolate2D(vec2 v0, vec2 v1, vec2 v2)
+{
+   	return vec2(gl_TessCoord.x) * v0 + vec2(gl_TessCoord.y) * v1 + vec2(gl_TessCoord.z) * v2;
+}
+
+vec3 interpolate3D(vec3 v0, vec3 v1, vec3 v2)
+{
+   	return vec3(gl_TessCoord.x) * v0 + vec3(gl_TessCoord.y) * v1 + vec3(gl_TessCoord.z) * v2;
+}
+

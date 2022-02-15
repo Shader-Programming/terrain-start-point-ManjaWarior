@@ -1,0 +1,64 @@
+// first step of tesselation shader
+// tesselation control shader add/deletes control points and determines the tesselatation level
+// patch has three control points here (three vertices for each triangle)
+
+
+#version 450 core
+layout (vertices =3) out;
+
+int getTessLevel(float eyeVertex1, float eyeVertex2);//caculates the tess level
+
+in vec3 posVS[] ;
+in vec2 texCoordsVS[] ;
+
+out vec3 posTC[] ;
+out vec2 texCoordsTC[] ;
+
+uniform vec3 viewPos ;//for calculating Tess level
+
+void main()
+{
+
+   float eyeToVertexDist0 = distance(viewPos, posVS[0]);
+   float eyeToVertexDist1 = distance(viewPos, posVS[1]);
+   float eyeToVertexDist2 = distance(viewPos, posVS[2]);
+
+   // pass through position and normal information
+   posTC[gl_InvocationID]  = posVS[gl_InvocationID] ;
+   texCoordsTC[gl_InvocationID] = texCoordsVS[gl_InvocationID] ;
+
+   // gpu can calculate each control point in parallel
+   // tesselation level same for entire patch so only need to set it once (for the first control point)
+   // gl_invocation called for each control point
+   if (gl_InvocationID==0)
+   {
+
+
+		   // Calculate the tessellation levels, constant tessellation levels can be better as a constant
+          gl_TessLevelOuter[0] = getTessLevel(eyeToVertexDist1, eyeToVertexDist2); 
+          gl_TessLevelOuter[1] = getTessLevel(eyeToVertexDist2, eyeToVertexDist0) ; 
+          gl_TessLevelOuter[2] = getTessLevel(eyeToVertexDist0, eyeToVertexDist1) ;//each of the edges calculated with each other
+          gl_TessLevelInner[0] = (getTessLevel(eyeToVertexDist1, eyeToVertexDist2) + getTessLevel(eyeToVertexDist2, eyeToVertexDist0) + getTessLevel(eyeToVertexDist0, eyeToVertexDist1)) / 3; 
+
+   }
+
+
+
+}
+
+int getTessLevel(float eyeVertex1, float eyeVertex2)
+{
+    int tessLevel = 0;
+    float distance = (eyeVertex1 + eyeVertex2) / 2; //adds the 2 edges and divides by 2
+	
+	/*tessLevel = 25 / max(int(distance / 2), 1);
+	tessLevel = clamp(tessLevel, 1, 25);
+	return tessLevel;*/ //Exponential, big flan's
+
+    float c = 20.0;//constant value, start value
+    float e = 2.718;//euler number
+    float k = 0.15;//scaling factor for the distance
+    tessLevel = int(c*pow(e,-distance*k));
+    tessLevel = clamp(tessLevel, 1, 100);
+    return tessLevel;
+}
