@@ -29,15 +29,13 @@ uniform DirLight dirLight;
 uniform Material mat ;
 uniform vec3 viewPos ;
 
-uniform sampler2D normalMap;
-
 
 void main()
 {   
     vec3 norm  = texture(normalMap, texCoordsES).xyz;
 	
     vec3 viewDir = normalize(viewPos - posES);
-	norm = normalize(gTBN*(norm*2.0 - 1.0)) ;
+	norm = normalize(TBN*(norm*2.0 - 1.0)) ;
 	vec3 ambient = dirLight.ambient * mat.ambient;     
     vec3 lightDir = normalize(-dirLight.direction);
     // diffuse shading

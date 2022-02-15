@@ -41,7 +41,7 @@ void main()
     return normalize(cross(a, b));
 }*/
 
-vec3 calcTangent()
+vec3 calcTangent)
 {
     vec3 deltaPos1 = vec3(gl_in[1].gl_Position) - vec3(gl_in[0].gl_Position);
     vec3 deltaPos2 = vec3(gl_in[2].gl_Position) - vec3(gl_in[0].gl_Position);
@@ -59,7 +59,7 @@ vec3 calcTangent()
     return normalize(thisTangent);
 }
 
-vec3 calcBiTangent()
+vec3 calcBiTangent)
 {
     vec3 deltaPos1 = vec3(gl_in[1].gl_Position) - vec3(gl_in[0].gl_Position);
     vec3 deltaPos2 = vec3(gl_in[2].gl_Position) - vec3(gl_in[0].gl_Position);

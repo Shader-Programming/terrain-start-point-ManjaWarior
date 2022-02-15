@@ -77,8 +77,9 @@ int main()
 	glCullFace(GL_BACK);
 
 	// simple vertex and fragment shader - add your own tess and geo shader
-	Shader shader("..\\shaders\\tessVert.vs", "..\\shaders\\phongDirFrag.fs", nullptr, "..\\shaders\\tessControlShader.tcs", "..\\shaders\\tessEvaluationShader.tes");
+	Shader shader("..\\shaders\\tessVert.vs", "..\\shaders\\phongDirFrag.fs", "..\\shaders\\Norms.gs", "..\\shaders\\tessControlShader.tcs", "..\\shaders\\tessEvaluationShader.tes");
 	unsigned int heightMap = loadTexture("..\\resources\\Path\\Stone_Path_005_Height.png");
+	unsigned int normalMap = loadTexture("..\\resources\\Path\\Stone_Path_005_Normal.jpg");
 
 	//Terrain Constructor ; number of grids in width, number of grids in height, gridSize
 	Terrain terrain(50, 50,10);
@@ -103,11 +104,7 @@ int main()
 	    shader.setMat4("projection", projection);
 		shader.setMat4("view", view);
 		shader.setMat4("model", model);
-		shader.setVec3("viewPos", camera.Position);
-		shader.setInt("heightMap", 0);
-		//shader.setInt("normalMap", 1);
-		shader.setInt("scale", 25);
-	
+
 		glBindVertexArray(terrainVAO);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glDrawArrays(GL_PATCHES, 0, terrain.getSize());
@@ -227,6 +224,11 @@ void setLightUniforms(Shader& tess) {
 	tess.setVec3("mat.diffuse", 0.396, 0.741, 0.691);
 	tess.setVec3("mat.specular", 0.297f, 0.308f, 0.306f);
 	tess.setFloat("mat.shininess", 0.9f);
+	//other properties
+	tess.setVec3("viewPos", camera.Position);
+	tess.setInt("heightMap", 0);
+	tess.setInt("normalMap", 1);
+	tess.setInt("scale", 25);
 
 }
 
