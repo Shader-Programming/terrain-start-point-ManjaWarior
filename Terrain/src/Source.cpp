@@ -105,6 +105,14 @@ int main()
 	    shader.setMat4("projection", projection);
 		shader.setMat4("view", view);
 		shader.setMat4("model", model);
+		shader.setVec3("viewPos", camera.Position);
+		shader.setInt("heightMap", 0);
+		glBindTexture(GL_TEXTURE_2D, heightMap);
+		glActiveTexture(GL_TEXTURE1);
+		shader.setInt("normalMap", 1);
+		glBindTexture(GL_TEXTURE_2D, normalMap);
+		glActiveTexture(GL_TEXTURE2);
+		shader.setInt("scale", 25);
 
 		glBindVertexArray(terrainVAO);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -226,10 +234,7 @@ void setLightUniforms(Shader& tess) {
 	tess.setVec3("mat.specular", 0.297f, 0.308f, 0.306f);
 	tess.setFloat("mat.shininess", 0.9f);
 	//other properties
-	tess.setVec3("viewPos", camera.Position);
-	tess.setInt("heightMap", 0);
-	tess.setInt("normalMap", 1);
-	tess.setInt("scale", 25);
+
 
 }
 
