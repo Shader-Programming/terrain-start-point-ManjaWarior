@@ -1,11 +1,8 @@
 #version 330 core
 out vec4 FragColor;
 
-
-in vec3 normalsES ;
-in vec2 texCoordsES;
-in vec3 posES ;
-
+in vec2 texCoordsGS;
+in vec3 posGS ;
 in mat3 gTBN;
 
 
@@ -29,13 +26,15 @@ uniform DirLight dirLight;
 uniform Material mat ;
 uniform vec3 viewPos ;
 
+uniform sampler2D normalMap;
+
 
 void main()
 {   
-    vec3 norm  = texture(normalMap, texCoordsES).xyz;
+    vec3 norm  = texture(normalMap, texCoordsGS).xyz;
 	
     vec3 viewDir = normalize(viewPos - posES);
-	norm = normalize(TBN*(norm*2.0 - 1.0)) ;
+	norm = normalize(gTBN*(norm*2.0 - 1.0)) ;
 	vec3 ambient = dirLight.ambient * mat.ambient;     
     vec3 lightDir = normalize(-dirLight.direction);
     // diffuse shading

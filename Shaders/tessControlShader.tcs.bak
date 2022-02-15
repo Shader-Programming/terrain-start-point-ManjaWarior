@@ -60,5 +60,5 @@ int getTessLevel(float eyeVertex1, float eyeVertex2)
     float k = 0.15;//scaling factor for the distance
     tessLevel = int(c*pow(e,-distance*k));
     tessLevel = clamp(tessLevel, 1, 100);
-    return 25;
+    return 100;
 }

@@ -78,9 +78,8 @@ int main()
 
 	// simple vertex and fragment shader - add your own tess and geo shader
 	Shader shader("..\\shaders\\tessVert.vs", "..\\shaders\\phongDirFrag.fs", "..\\shaders\\Norms.gs", "..\\shaders\\tessControlShader.tcs", "..\\shaders\\tessEvaluationShader.tes");
-	Shader drawNorms("..\\shaders\\drawNorms\\basicVert.vs", "..\\shaders\\drawNorms\\basicFrag.fs", "..\\shaders\\drawNorms\\drawNormalsGeo.gs", nullptr, nullptr);
-	unsigned int heightMap = loadTexture("..\\resources\\Path\\Stone_Path_005_Height.png");
-	unsigned int normalMap = loadTexture("..\\resources\\Path\\Stone_Path_005_Normal.jpg");
+	unsigned int heightMap = loadTexture("..\\resources\\newPath\\Stone_Path_008_height.png");
+	unsigned int normalMap = loadTexture("..\\resources\\newPath\\Stone_Path_008_Normal.jpg");
 
 	//Terrain Constructor ; number of grids in width, number of grids in height, gridSize
 	Terrain terrain(50, 50,10);
@@ -101,12 +100,6 @@ int main()
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1200.0f);
 		glm::mat4 view = camera.GetViewMatrix();
 		glm::mat4 model = glm::mat4(1.0f);
-
-		drawNorms.use();
-		drawNorms.setMat4("projection", projection);
-		drawNorms.setMat4("view", view);
-		drawNorms.setMat4("model", model);
-		drawNorms.setFloat("normLength", 15.f);
 
 	    shader.use();
 	    shader.setMat4("projection", projection);

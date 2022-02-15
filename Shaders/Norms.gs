@@ -11,7 +11,7 @@ in vec2 texCoordsES[] ;
 in vec3 normalsES[] ;
 
 out vec2 texCoordsGS ;
-out vec3 gWorldPos_FS_in ;
+out vec3 posGS ;
 out mat3 gTBN;
 
 void main()
@@ -22,8 +22,8 @@ void main()
    for(int i = 0 ; i < 3; i++)
    {
       gl_Position = gl_in[i].gl_Position ;
-      gWorldPos_FS_in = posES[i] ;
-      //texCoordsGS = getNormal() ;  
+      posGS = posES[i] ;
+      texCoordsGS = texCoordsES[i] ;  
 	  
 	  gTBN = mat3(tangent, biTangent, normalsES[i]);
 	  
@@ -38,7 +38,7 @@ void main()
 {
     vec3 a = vec3(gl_in[1].gl_Position) - vec3(gl_in[0].gl_Position);
     vec3 b = vec3(gl_in[2].gl_Position) - vec3(gl_in[0].gl_Position);
-    return normalize(cross(a, b));
+    return normalize(cross(a, b)).xy;
 }*/
 
 vec3 calcTangent()
