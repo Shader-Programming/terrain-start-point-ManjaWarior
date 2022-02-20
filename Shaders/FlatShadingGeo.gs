@@ -10,12 +10,14 @@ vec3 calcTangent() ;
 in vec3 normalsES[];
 in vec2 texCoordsES[];
 in vec3 posES[];//arrays for each triangle in the mesh
+in float visibilityES[];
 
 
 out vec3 normalsGS;
 out vec2 texCoordsGS;
 out mat3 gTBN;
 out vec3 posGS;
+out float visibilityGS;
 
 void main()
 {
@@ -26,7 +28,9 @@ void main()
 		posGS = posES[i];
 
 		gl_Position = gl_in[i].gl_Position;
-
+		
+		visibilityGS = visibilityES[i];
+		
 		gTBN = mat3(calcTangent(), calcBiTangent(), normalize(normalsES[i]));
 		EmitVertex();
 	}

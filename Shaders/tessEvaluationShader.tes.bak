@@ -30,7 +30,7 @@ in vec2 texCoordsTC[] ;
 out vec2 texCoordsES ;
 out vec3 posES ;
 out vec3 normalsES ;
-out float visibilityES;
+out vec4 visibilityES;
 
 
 void main()

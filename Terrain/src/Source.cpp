@@ -80,6 +80,7 @@ int main()
 	Shader shader("..\\shaders\\tessVert.vs", "..\\shaders\\phongDirFrag.fs", "..\\shaders\\FlatShadingGeo.gs", "..\\shaders\\tessControlShader.tcs", "..\\shaders\\tessEvaluationShader.tes");
 	unsigned int heightMap = loadTexture("..\\resources\\newPath\\Stone_Path_008_height.png");
 	unsigned int normalMap = loadTexture("..\\resources\\newPath\\Stone_Path_008_Normal.jpg");
+	unsigned int colourMap = loadTexture("..\\resources\\newPath\\Stone_Path_008_basecolor.jpg");
 
 	//Terrain Constructor ; number of grids in width, number of grids in height, gridSize
 	Terrain terrain(50, 50,10);
@@ -106,13 +107,29 @@ int main()
 		shader.setMat4("view", view);
 		shader.setMat4("model", model);
 		shader.setVec3("viewPos", camera.Position);
+		//height map
 		shader.setInt("heightMap", 0);
 		glBindTexture(GL_TEXTURE_2D, heightMap);
 		glActiveTexture(GL_TEXTURE1);
+		//normal mapping
 		shader.setInt("normalMap", 1);
 		glBindTexture(GL_TEXTURE_2D, normalMap);
 		glActiveTexture(GL_TEXTURE2);
 		shader.setInt("scale", 25);
+		//tri planer
+		shader.setInt("colourMap", 2);
+		glBindTexture(GL_TEXTURE_2D, colourMap);
+		glActiveTexture(GL_TEXTURE3);
+
+		//fog stuff
+		shader.setFloat("DENS", 1.2f);
+		shader.setFloat("G", 0.005f);
+
+		const float RED = 0.3f;
+		const float GREEN = 0.3f;
+		const float BLUE = 0.2f;
+		glClearColor(RED, GREEN, BLUE, 1.0); //default sky colour
+		shader.setVec3("sky", glm::vec3(RED, GREEN, BLUE));
 
 		glBindVertexArray(terrainVAO);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

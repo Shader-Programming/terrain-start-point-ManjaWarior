@@ -55,10 +55,10 @@ int getTessLevel(float eyeVertex1, float eyeVertex2)
 	tessLevel = clamp(tessLevel, 1, 25);
 	return tessLevel;*/ //Exponential, big flan's
 
-    float c = 20.0;//constant value, start value
+    float c = 25.0;//constant value, start value
     float e = 2.718;//euler number
-    float k = 0.15;//scaling factor for the distance
+    float k = 0.0065;//scaling factor for the distance
     tessLevel = int(c*pow(e,-distance*k));
     tessLevel = clamp(tessLevel, 1, 100);
-    return 100;
+    return tessLevel;
 }
