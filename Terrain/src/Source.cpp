@@ -122,12 +122,12 @@ int main()
 		glActiveTexture(GL_TEXTURE3);
 
 		//fog stuff
-		shader.setFloat("DENS", 1.2f);
-		shader.setFloat("G", 0.005f);
+		shader.setFloat("DENS", 0.005f);
+		shader.setFloat("G", 1.2f);
 
-		const float RED = 0.3f;
-		const float GREEN = 0.3f;
-		const float BLUE = 0.2f;
+		const float RED = 0.5f;
+		const float GREEN = 0.5f;
+		const float BLUE = 0.5f;
 		glClearColor(RED, GREEN, BLUE, 1.0); //default sky colour
 		shader.setVec3("sky", glm::vec3(RED, GREEN, BLUE));
 

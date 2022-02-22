@@ -39,7 +39,7 @@ uniform vec3 sky;
 void main()
 {   
 	//colouring by height
-    /*float height = posGS.y/scale;
+    float height = posGS.y/scale;
     vec4 green = vec4(0.3, 0.35, 0.15, 0.0);
     vec4 gray = vec4(0.5, 0.4,0.5, 0.0);
     
@@ -53,7 +53,7 @@ void main()
     {
         colour = colour;
     } //this will do the colour shading from the video
-	FragColor = vec4(colour, 1.0);//swaps the result to the coloured version from the video*/
+	FragColor = vec4(colour, 1.0);//swaps the result to the coloured version from the video
 	
 	
 	//tri planer
@@ -100,8 +100,8 @@ void main()
    
     vec3 diffuse  = dirLight.diffuse  * (diff * mat.diffuse) /* * tpTex.rgb*/;
     vec3 specular = dirLight.specular * (spec * mat.specular);
-    FragColor = vec4((ambient + diffuse + specular),1.0f);
-	FragColor = mix(vec4(sky,1.0), FragColor, visibilityGS);
+    //FragColor = vec4((ambient + diffuse + specular),1.0f);
+	//FragColor = mix(vec4(sky,1.0), FragColor, visibilityGS);
 
 }
 
