@@ -30,7 +30,6 @@ uniform Material mat ;
 uniform vec3 viewPos ;
 
 uniform sampler2D normalMap;
-uniform sampler2D colourMap;
 
 uniform int scale;
 
@@ -42,36 +41,31 @@ void main()
     float height = posGS.y/scale;
     vec4 green = vec4(0.3, 0.35, 0.15, 0.0);
     vec4 gray = vec4(0.5, 0.4,0.5, 0.0);
+	vec4 red = vec4(1.0, 0.2, 0.2, 0.0);
     
     vec3 colour = vec3(0.1);
 
-    if(height > 0.00005)
+    if(height > 0.0 && height < 0.5)
     {
-        colour = vec3(mix(green, gray, smoothstep(0.1, 1.0, height)).rgb);
+        colour = vec3(mix(green, gray, smoothstep(0.6, 1.0, height)).rgb);
     }
+	else if (height >= 0.5)
+	{
+		colour = vec3(mix(green, red, smoothstep(0.3, 2.0, height)).rgb);
+	}
     else
     {
         colour = colour;
     } //this will do the colour shading from the video
-	FragColor = vec4(colour, 1.0);//swaps the result to the coloured version from the video
 	
 	
-	//tri planer
-	
+	//tri planer for normals
 	//percentage multiplier for each axis
 	vec3 blendPercent = normalize(abs(normalsGS));
 	float b = (blendPercent.x + blendPercent.y + blendPercent.z);
 	blendPercent = blendPercent/vec3(b);
 	
-	//now blend the three values with the texture from each axis perspective
-	vec4 xaxis = texture(colourMap, posGS.yz);
-	vec4 yaxis = texture(colourMap, posGS.xz);
-	vec4 zaxis = texture(colourMap, posGS.xy);
-	
-	vec4 tpTex = xaxis*blendPercent.x + yaxis*blendPercent.y + zaxis*blendPercent.z;
-	
-	
-	vec3 norm  = texture(normalMap, texCoordsGS).xyz;
+	vec3 norm  = texture(normalMap, texCoordsGS * 10).xyz;
 	norm = normalize(gTBN*(norm*2.0 - 1.0)) ;
 	
 	//tri planer normal mapping
@@ -89,19 +83,19 @@ void main()
 	
 	
 	//Lighting
-	vec3 ambient = dirLight.ambient * mat.ambient /** tpTex.rgb*/;     
+	vec3 ambient = dirLight.ambient * mat.ambient;     
     vec3 lightDir = normalize(-dirLight.direction);
     // diffuse shading
-    float diff = max(dot(norm /*tpTexNorm.rgb*/, -dirLight.direction), 0.0);
+    float diff = max(dot(norm, -dirLight.direction), 0.0);
     // specular shading
-    vec3 reflectDir = reflect(-dirLight.direction, norm /*tpTexNorm.rgb*/);
+    vec3 reflectDir = reflect(-dirLight.direction, tpTexNorm.rgb);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), mat.shininess);
     // combine results
    
-    vec3 diffuse  = dirLight.diffuse  * (diff * mat.diffuse) /* * tpTex.rgb*/;
+    vec3 diffuse  = dirLight.diffuse  * (diff * mat.diffuse);
     vec3 specular = dirLight.specular * (spec * mat.specular);
-    //FragColor = vec4((ambient + diffuse + specular),1.0f);
-	//FragColor = mix(vec4(sky,1.0), FragColor, visibilityGS);
+    FragColor = vec4((ambient + diffuse + specular) * colour ,1.0f);
+	//FragColor = mix(vec4(sky,1.0), FragColor, visibilityGS);//fog
 
 }
 

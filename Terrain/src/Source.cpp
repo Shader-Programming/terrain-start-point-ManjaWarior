@@ -22,7 +22,7 @@
 // settings
 const unsigned int SCR_WIDTH = 1200;
 const unsigned int SCR_HEIGHT = 900;
-glm::vec3 dirLightPos(.7f, -.6f, .2f);
+glm::vec3 dirLightPos(1.4f, -.6f, 0.4f);
 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -79,8 +79,7 @@ int main()
 	// simple vertex and fragment shader - add your own tess and geo shader
 	Shader shader("..\\shaders\\tessVert.vs", "..\\shaders\\phongDirFrag.fs", "..\\shaders\\FlatShadingGeo.gs", "..\\shaders\\tessControlShader.tcs", "..\\shaders\\tessEvaluationShader.tes");
 	unsigned int heightMap = loadTexture("..\\resources\\newPath\\Stone_Path_008_height.png");
-	unsigned int normalMap = loadTexture("..\\resources\\newPath\\Stone_Path_008_Normal.jpg");
-	unsigned int colourMap = loadTexture("..\\resources\\newPath\\Stone_Path_008_basecolor.jpg");
+	unsigned int normalMap = loadTexture("..\\resources\\newPath\\Ground_Dirt_009_Normal.jpg");
 
 	//Terrain Constructor ; number of grids in width, number of grids in height, gridSize
 	Terrain terrain(50, 50,10);
@@ -115,11 +114,9 @@ int main()
 		shader.setInt("normalMap", 1);
 		glBindTexture(GL_TEXTURE_2D, normalMap);
 		glActiveTexture(GL_TEXTURE2);
-		shader.setInt("scale", 25);
-		//tri planer
-		shader.setInt("colourMap", 2);
-		glBindTexture(GL_TEXTURE_2D, colourMap);
-		glActiveTexture(GL_TEXTURE3);
+		shader.setInt("scale", 50);
+
+		shader.setInt("octaves", 10);
 
 		//fog stuff
 		shader.setFloat("DENS", 0.005f);
@@ -247,7 +244,7 @@ void setLightUniforms(Shader& tess) {
 	tess.setVec3("dirLight.specular", 0.6f, 0.6f, 0.6f);
 	//material properties
 	tess.setVec3("mat.ambient", 0.3, 0.387, 0.317);
-	tess.setVec3("mat.diffuse", 0.396, 0.741, 0.691);
+	tess.setVec3("mat.diffuse", 0.3, 0.3, 0.3);
 	tess.setVec3("mat.specular", 0.297f, 0.308f, 0.306f);
 	tess.setFloat("mat.shininess", 0.9f);
 	//other properties

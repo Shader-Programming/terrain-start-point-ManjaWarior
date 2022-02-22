@@ -21,12 +21,12 @@ out float visibilityGS;
 
 void main()
 {
-	normalsGS = getSurfaceNormal();//the surface normal per triangle strip
+	//normalsGS = getSurfaceNormal();//the surface normal per triangle strip
 	for(int i = 0; i < 3; i++)
 	{
 		texCoordsGS = texCoordsES[i];
 		posGS = posES[i];
-
+		normalsGS = normalsES[i];
 		gl_Position = gl_in[i].gl_Position;
 		
 		visibilityGS = visibilityES[i];
