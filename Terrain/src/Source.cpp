@@ -22,8 +22,10 @@
 // settings
 const unsigned int SCR_WIDTH = 1200;
 const unsigned int SCR_HEIGHT = 900;
-glm::vec3 dirLightPos(1.4f, -.6f, 0.4f);
 
+//own variables
+glm::vec3 dirLightPos(1.4f, -.6f, 0.4f);
+unsigned int NormalMap = 0;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -34,6 +36,7 @@ unsigned int loadTexture(char const * path);
 void setVAO(vector <float> vertices);
 
 void setLightUniforms(Shader& shader);
+void updatePerFrameUniforms(Shader& shader);
 
 // camera
 Camera camera(glm::vec3(260,50,300));
@@ -78,8 +81,6 @@ int main()
 
 	// simple vertex and fragment shader - add your own tess and geo shader
 	Shader shader("..\\shaders\\tessVert.vs", "..\\shaders\\phongDirFrag.fs", "..\\shaders\\FlatShadingGeo.gs", "..\\shaders\\tessControlShader.tcs", "..\\shaders\\tessEvaluationShader.tes");
-	unsigned int heightMap = loadTexture("..\\resources\\newPath\\Stone_Path_008_height.png");
-	unsigned int normalMap = loadTexture("..\\resources\\newPath\\Ground_Dirt_009_Normal.jpg");
 
 	//Terrain Constructor ; number of grids in width, number of grids in height, gridSize
 	Terrain terrain(50, 50,10);
@@ -96,37 +97,10 @@ int main()
 		processInput(window);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
-		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1200.0f);
-		glm::mat4 view = camera.GetViewMatrix();
-		glm::mat4 model = glm::mat4(1.0f);
 
 	    shader.use();
-	    shader.setMat4("projection", projection);
-		shader.setMat4("view", view);
-		shader.setMat4("model", model);
-		shader.setVec3("viewPos", camera.Position);
-		//height map
-		shader.setInt("heightMap", 0);
-		glBindTexture(GL_TEXTURE_2D, heightMap);
-		glActiveTexture(GL_TEXTURE1);
-		//normal mapping
-		shader.setInt("normalMap", 1);
-		glBindTexture(GL_TEXTURE_2D, normalMap);
-		glActiveTexture(GL_TEXTURE2);
-		shader.setInt("scale", 50);
 
-		shader.setInt("octaves", 10);
-
-		//fog stuff
-		shader.setFloat("DENS", 0.005f);
-		shader.setFloat("G", 1.2f);
-
-		const float RED = 0.5f;
-		const float GREEN = 0.5f;
-		const float BLUE = 0.5f;
-		glClearColor(RED, GREEN, BLUE, 1.0); //default sky colour
-		shader.setVec3("sky", glm::vec3(RED, GREEN, BLUE));
+		updatePerFrameUniforms(shader);
 
 		glBindVertexArray(terrainVAO);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -156,6 +130,11 @@ void processInput(GLFWwindow *window)
 		camera.ProcessKeyboard(LEFT, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		camera.ProcessKeyboard(RIGHT, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)//normal map swap for flat shading or tri planer normal mapping
+	{
+		if (NormalMap == 1) NormalMap = 0;
+		else NormalMap = 1;
+	}
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -236,6 +215,11 @@ unsigned int loadTexture(char const * path)
 }
 
 void setLightUniforms(Shader& tess) {
+	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1200.0f);
+	glm::mat4 model = glm::mat4(1.0f);
+	unsigned int heightMap = loadTexture("..\\resources\\newPath\\Stone_Path_008_height.png");
+	unsigned int normalMap = loadTexture("..\\resources\\newPath\\Ground_Dirt_009_Normal.jpg");
+
 	tess.use();
 	//light properties
 	tess.setVec3("dirLight.direction", dirLightPos);
@@ -247,11 +231,42 @@ void setLightUniforms(Shader& tess) {
 	tess.setVec3("mat.diffuse", 0.3, 0.3, 0.3);
 	tess.setVec3("mat.specular", 0.297f, 0.308f, 0.306f);
 	tess.setFloat("mat.shininess", 0.9f);
-	//other properties
 
+	//other properties
+	tess.setMat4("projection", projection);
+	tess.setMat4("model", model);
+
+	//height map
+	tess.setInt("heightMap", 0);
+	glBindTexture(GL_TEXTURE_2D, heightMap);
+	glActiveTexture(GL_TEXTURE1);
+	//normal mapping
+	tess.setInt("normalMap", 1);
+	glBindTexture(GL_TEXTURE_2D, normalMap);
+	glActiveTexture(GL_TEXTURE2);
+	tess.setInt("scale", 50); //scale of perlin noise generation 
+	tess.setInt("octaves", 10);//number of octaves in perlin noise
+
+	//fog stuff
+	tess.setFloat("DENS", 0.005f);//desnity of the fog
+	tess.setFloat("G", 1.2f);
+
+	const float RED = 0.5f;
+	const float GREEN = 0.5f;
+	const float BLUE = 0.5f;
+	glClearColor(RED, GREEN, BLUE, 1.0); //default sky colour
+	tess.setVec3("sky", glm::vec3(RED, GREEN, BLUE));//grey colour for fog
 
 }
 
+void updatePerFrameUniforms(Shader& tess)
+{
+	tess.use();
+	glm::mat4 view = camera.GetViewMatrix();
+	tess.setMat4("view", view);
+	tess.setVec3("viewPos", camera.Position);
+	tess.setInt("Map", NormalMap);
+}
 
 
 

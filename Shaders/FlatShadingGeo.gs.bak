@@ -10,23 +10,23 @@ vec3 calcTangent() ;
 in vec3 normalsES[];
 in vec2 texCoordsES[];
 in vec3 posES[];//arrays for each triangle in the mesh
-in vec4 visibilityES[];
+in float visibilityES[];
 
 
 out vec3 normalsGS;
 out vec2 texCoordsGS;
 out mat3 gTBN;
 out vec3 posGS;
-out vec4 visibilityGS;
+out float visibilityGS;
 
 void main()
 {
-	normalsGS = getSurfaceNormal();//the surface normal per triangle strip
+	//normalsGS = getSurfaceNormal();//the surface normal per triangle strip
 	for(int i = 0; i < 3; i++)
 	{
 		texCoordsGS = texCoordsES[i];
 		posGS = posES[i];
-
+		normalsGS = normalsES[i];
 		gl_Position = gl_in[i].gl_Position;
 		
 		visibilityGS = visibilityES[i];

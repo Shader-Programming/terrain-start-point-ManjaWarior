@@ -14,6 +14,7 @@ in float visibilityES[];
 
 
 out vec3 normalsGS;
+out vec3 flatNormalsGS;
 out vec2 texCoordsGS;
 out mat3 gTBN;
 out vec3 posGS;
@@ -21,7 +22,7 @@ out float visibilityGS;
 
 void main()
 {
-	//normalsGS = getSurfaceNormal();//the surface normal per triangle strip
+	flatNormalsGS = getSurfaceNormal();//the surface normal per triangle strip
 	for(int i = 0; i < 3; i++)
 	{
 		texCoordsGS = texCoordsES[i];
