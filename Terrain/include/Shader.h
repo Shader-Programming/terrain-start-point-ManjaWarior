@@ -14,6 +14,7 @@ class Shader
 public:
 	unsigned int ID;
 	Shader(const char* vertexPath, const char* fragmentPath, const char* geometryPath = nullptr, const char* tessControlPath = nullptr, const char* tessEvalPath = nullptr);
+	Shader(const char* computePath);
 	void use();
 	// utility uniform functions
 	void setBool(const std::string &name, bool value) const;

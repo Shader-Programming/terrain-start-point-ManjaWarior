@@ -26,6 +26,7 @@ const unsigned int SCR_HEIGHT = 900;
 //own variables
 glm::vec3 dirLightPos(1.4f, -.6f, 0.4f);
 unsigned int NormalMap = 0;
+unsigned int output_img = 1; 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -81,6 +82,7 @@ int main()
 
 	// simple vertex and fragment shader - add your own tess and geo shader
 	Shader shader("..\\shaders\\tessVert.vs", "..\\shaders\\phongDirFrag.fs", "..\\shaders\\FlatShadingGeo.gs", "..\\shaders\\tessControlShader.tcs", "..\\shaders\\tessEvaluationShader.tes");
+	Shader compute("..\\shaders\\ComputeShader.cs");
 
 	//Terrain Constructor ; number of grids in width, number of grids in height, gridSize
 	Terrain terrain(50, 50,10);
@@ -248,8 +250,8 @@ void setLightUniforms(Shader& tess) {
 	tess.setInt("octaves", 10);//number of octaves in perlin noise
 
 	//fog stuff
-	tess.setFloat("DENS", 0.005f);//desnity of the fog
-	tess.setFloat("G", 1.2f);
+	tess.setFloat("DENS", 0.005f);//density of the fog
+	tess.setFloat("G", 1.2f);//gradient of the fog
 
 	const float RED = 0.5f;
 	const float GREEN = 0.5f;
