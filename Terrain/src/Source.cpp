@@ -1,7 +1,3 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include "stb_image.h"
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -12,9 +8,9 @@
 
 #include <Model.h>
 #include "Terrain.h"
+#include "TextureManager.h"
 
 #include<string>
-#include <iostream>
 #include <numeric>
 
 
@@ -25,18 +21,18 @@ const unsigned int SCR_HEIGHT = 900;
 
 //own variables
 glm::vec3 dirLightPos(1.4f, -.6f, 0.4f);
+
 unsigned int NormalMap = 0;
-unsigned int output_img = 1; 
+unsigned int output_img; 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
-unsigned int loadTexture(char const * path);
 //unsigned int loadTexture2(char const * path);
 void setVAO(vector <float> vertices);
 
-void setLightUniforms(Shader& shader);
+void setLightUniforms(Shader& shader, TextureManager* texMan);
 void updatePerFrameUniforms(Shader& shader);
 
 // camera
@@ -55,7 +51,7 @@ float lastFrame = 0.0f;
 int main()
 {
 	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "IMAT3907", NULL, NULL);
@@ -80,6 +76,8 @@ int main()
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
+	TextureManager* texMan = new TextureManager();
+
 	// simple vertex and fragment shader - add your own tess and geo shader
 	Shader shader("..\\shaders\\tessVert.vs", "..\\shaders\\phongDirFrag.fs", "..\\shaders\\FlatShadingGeo.gs", "..\\shaders\\tessControlShader.tcs", "..\\shaders\\tessEvaluationShader.tes");
 	Shader compute("..\\shaders\\ComputeShader.cs");
@@ -88,7 +86,15 @@ int main()
 	Terrain terrain(50, 50,10);
 	terrainVAO = terrain.getVAO();
 
-	setLightUniforms(shader);
+	shader.use();
+	setLightUniforms(shader, texMan);
+
+	compute.use();
+	output_img = texMan->createTexture(512, 512);
+	glBindImageTexture(0, output_img, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+	glDispatchCompute(32, 16, 1);
+	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+	
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -101,12 +107,14 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	    shader.use();
-
-		updatePerFrameUniforms(shader);
+		updatePerFrameUniforms(shader);		
 
 		glBindVertexArray(terrainVAO);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glDrawArrays(GL_PATCHES, 0, terrain.getSize());
+
+		//texMan->drawTexture(output_img);
+		
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -177,50 +185,11 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	camera.ProcessMouseScroll(yoffset);
 }
 
-unsigned int loadTexture(char const * path)
-{
-	unsigned int textureID;
-	glGenTextures(1, &textureID);
-
-	int width, height, nrComponents;
-	unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
-	if (data)
-	{
-		GLenum format;
-		if (nrComponents == 1)
-			format = GL_RED;
-		else if (nrComponents == 3)
-			format = GL_RGB;
-		else if (nrComponents == 4)
-			format = GL_RGBA;
-
-		glBindTexture(GL_TEXTURE_2D, textureID);
-		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		stbi_image_free(data);
-		std::cout << "Loaded texture at path: " << path << " width " << width << " id " << textureID <<  std::endl;
-
-	}
-	else
-	{
-		std::cout << "Texture failed to load at path: " << path << std::endl;
-		stbi_image_free(data);
-		
-	}
-
-	return textureID;
-}
-
-void setLightUniforms(Shader& tess) {
+void setLightUniforms(Shader& tess, TextureManager* texMan) {
 	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1200.0f);
 	glm::mat4 model = glm::mat4(1.0f);
-	unsigned int heightMap = loadTexture("..\\resources\\newPath\\Stone_Path_008_height.png");
-	unsigned int normalMap = loadTexture("..\\resources\\newPath\\Ground_Dirt_009_Normal.jpg");
+	unsigned int heightMap = texMan->loadTexture("..\\resources\\newPath\\Stone_Path_008_height.png");
+	unsigned int normalMap = texMan->loadTexture("..\\resources\\newPath\\Ground_Dirt_009_Normal.jpg");
 
 	tess.use();
 	//light properties
