@@ -2,6 +2,7 @@
 
 out vec4 FragColor;
 
+in vec3 posVS; 
 in vec2 texCoordsVS ;
 
 uniform sampler2D output_img;

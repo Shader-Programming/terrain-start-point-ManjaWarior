@@ -29,7 +29,7 @@ unsigned int TextureManager::createTexture(int height, int width)
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	// set the texture wrapping/filtering options (on the currently bound texture object)
@@ -43,10 +43,9 @@ unsigned int TextureManager::createTexture(int height, int width)
 
 void TextureManager::drawTexture(unsigned int textureObj)
 {
+	textureDrawer->use();
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, textureObj);
-	/*glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, textureObj2);*/
 	glBindVertexArray(quadVAO);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	glBindVertexArray(0);
@@ -79,7 +78,7 @@ unsigned int TextureManager::loadTexture(char const* path)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		stbi_image_free(data);
 		std::cout << "Loaded texture at path: " << path << " width " << width << " id " << textureID << std::endl;
-
+		std::cout << nrComponents << std::endl;
 	}
 	else
 	{
