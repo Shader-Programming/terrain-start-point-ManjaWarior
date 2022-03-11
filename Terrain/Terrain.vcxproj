@@ -121,11 +121,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\Camera.h" />
-    <ClInclude Include="include\Header.h" />
     <ClInclude Include="include\Mesh.h" />
     <ClInclude Include="include\Model.h" />
     <ClInclude Include="include\PerlinNoise.h" />
     <ClInclude Include="include\Shader.h" />
+    <ClInclude Include="include\Source.h" />
     <ClInclude Include="include\stb_image.h" />
     <ClInclude Include="include\Terrain.h" />
     <ClInclude Include="include\TextureManager.h" />

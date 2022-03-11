@@ -90,6 +90,9 @@ int main()
 	setLightUniforms(shader, texMan);
 
 	compute.use();
+	compute.setInt("scale", 200);//higher scale, more spread apart pixels
+	//possible the wrong angle on the pixels?
+	compute.setInt("octaves", 10);
 	output_img = texMan->createTexture(512, 512);
 	glBindImageTexture(0, output_img, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 	glDispatchCompute(32, 16, 1);
@@ -98,7 +101,6 @@ int main()
 
 	while (!glfwWindowShouldClose(window))
 	{
-
 		float currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
 		lastFrame = currentFrame;
@@ -107,7 +109,8 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	    shader.use();
-		updatePerFrameUniforms(shader);		
+		updatePerFrameUniforms(shader);
+		shader.setInt("perlin_img", output_img);
 
 		glBindVertexArray(terrainVAO);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -115,11 +118,9 @@ int main()
 
 		texMan->drawTexture(output_img);
 		
-
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-
 
 	glfwTerminate();
 	return 0;
@@ -185,7 +186,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	camera.ProcessMouseScroll(yoffset);
 }
 
-void setLightUniforms(Shader& tess, TextureManager* texMan) {
+void setLightUniforms(Shader& tess, TextureManager* texMan) {//think about moving this stuff to terrain class, issue is currently accessing variables here such as the camera and screen values
 	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1200.0f);
 	glm::mat4 model = glm::mat4(1.0f);
 	unsigned int heightMap = texMan->loadTexture("..\\resources\\newPath\\Stone_Path_008_height.png");

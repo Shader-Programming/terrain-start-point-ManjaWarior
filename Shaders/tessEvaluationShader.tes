@@ -20,6 +20,9 @@ uniform mat4 projection;
 uniform vec3 viewPos;
 
 uniform sampler2D heightMap;
+
+uniform sampler2D perlin_img;
+
 uniform int scale;
 uniform int octaves;
 
@@ -68,7 +71,9 @@ void main()
    float d = noise(down,octaves);
    normalsES = normalize(vec3((l-r), 2, (d-u)));
 
-   posES.y = noise(posES, octaves);
+   //posES.y = noise(posES, octaves);//working perlin
+   posES.y = texture(perlin_img, texCoordsES).y;
+
     // transform vertex to clip space
 	gl_Position = projection * view * model *vec4(posES, 1.0);
 	

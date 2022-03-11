@@ -78,7 +78,6 @@ unsigned int TextureManager::loadTexture(char const* path)
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		stbi_image_free(data);
 		std::cout << "Loaded texture at path: " << path << " width " << width << " id " << textureID << std::endl;
-		std::cout << nrComponents << std::endl;
 	}
 	else
 	{

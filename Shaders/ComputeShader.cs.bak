@@ -12,9 +12,10 @@ uniform int scale;
 uniform int octaves;
 
 void main()
-{	
-	ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);
-	vec4 pixel = vec4(vec3(noise(pixel_coords,octaves),0,0), 1.0);
+{
+	vec4 pixel = vec4(1.0, 0.5, 0.0, 1.0);
+	float local_y = noise(gl_GlobalInvocationID.xy, octaves);
+	ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.x, local_y);
 	imageStore(img_output, pixel_coords, pixel);
 } 
 
@@ -33,7 +34,7 @@ float snoise(vec2 x)
 	return mix(mix(mix(hash(n + 0.0f), hash(n + 1.0f), f.x),
 		mix(hash(n + 157.0f), hash(n + 158.0f), f.x), f.y),
 		mix(mix(hash(n + 113.0f), hash(n + 114.0f), f.x),
-			mix(hash(n + 270.0f), hash(n + 271.0f), f.x), f.y),1.0);
+			mix(hash(n + 270.0f), hash(n + 271.0f), f.x), f.y), f.z);
 }
 
 float noise(vec2 position, int octaves)

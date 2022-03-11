@@ -8,7 +8,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 
+
 #include "PerlinNoise.h"
+
 
 class Terrain
 {
@@ -17,7 +19,6 @@ public:
 	Terrain();
 	unsigned int getVAO();
 	int getSize();
-	
 	
 private:
 	std::vector<float> vertices;
