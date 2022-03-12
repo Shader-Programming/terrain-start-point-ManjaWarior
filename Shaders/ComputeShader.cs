@@ -1,7 +1,8 @@
 #version 430
 
-layout(local_size_x = 16, local_size_y = 32) in;
-layout (binding = 0, rgba32f) uniform image2D img_output;
+layout(local_size_x = 16, local_size_y = 32, local_size_z = 1) in;
+layout (binding = 0, rgba32f) uniform image2D perlin_output;
+layout (binding = 0, rgba32f) uniform image2D normals_output;
 //stuff
 
 float noise(vec3 position, int octaves);
@@ -14,12 +15,10 @@ uniform int octaves;
 void main()
 {
 	ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);
+	float perlinPixelColour  = noise(vec3(pixel_coords.x, pixel_coords.y, 1.0), octaves);
+	vec4 pixel = vec4(perlinPixelColour, perlinPixelColour, perlinPixelColour, 1.0);
 	
-	float pixelColour  = noise(vec3(pixel_coords.x, pixel_coords.y, 1.0), octaves);
-	
-	vec4 pixel = vec4(pixelColour, pixelColour, pixelColour, 1.0);
-	
-	imageStore(img_output, pixel_coords, pixel);
+	imageStore(perlin_output, pixel_coords, pixel);
 } 
 
 

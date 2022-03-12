@@ -13,6 +13,7 @@
 #include<string>
 #include <numeric>
 
+#include "Source.h"
 
 
 // settings
@@ -81,6 +82,7 @@ int main()
 	// simple vertex and fragment shader - add your own tess and geo shader
 	Shader shader("..\\shaders\\tessVert.vs", "..\\shaders\\phongDirFrag.fs", "..\\shaders\\FlatShadingGeo.gs", "..\\shaders\\tessControlShader.tcs", "..\\shaders\\tessEvaluationShader.tes");
 	Shader compute("..\\shaders\\ComputeShader.cs");
+	//Shader normalsCompute("..\\shaders\\normalsCompute.cs");
 
 	//Terrain Constructor ; number of grids in width, number of grids in height, gridSize
 	Terrain terrain(50, 50,10);
@@ -97,7 +99,16 @@ int main()
 	glBindImageTexture(0, output_img, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 	glDispatchCompute(32, 16, 1);
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-	
+
+	/*normalsCompute.use();
+	normalsCompute.setFloat("scale", 1.0f);
+	normalsCompute.setInt("perlin_img", 0);
+	glBindTexture(GL_TEXTURE_2D, output_img);
+	glActiveTexture(GL_TEXTURE0);
+	unsigned int normal_img = texMan->createTexture(512, 512);
+	glBindImageTexture(0, normal_img, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+	glDispatchCompute(32, 16, 1);
+	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);*/
 
 	while (!glfwWindowShouldClose(window))
 	{

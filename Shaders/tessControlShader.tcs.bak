@@ -32,14 +32,11 @@ void main()
    // gl_invocation called for each control point
    if (gl_InvocationID==0)
    {
-
-
 		   // Calculate the tessellation levels, constant tessellation levels can be better as a constant
           gl_TessLevelOuter[0] = getTessLevel(eyeToVertexDist1, eyeToVertexDist2); 
           gl_TessLevelOuter[1] = getTessLevel(eyeToVertexDist2, eyeToVertexDist0) ; 
           gl_TessLevelOuter[2] = getTessLevel(eyeToVertexDist0, eyeToVertexDist1) ;//each of the edges calculated with each other
           gl_TessLevelInner[0] = (getTessLevel(eyeToVertexDist1, eyeToVertexDist2) + getTessLevel(eyeToVertexDist2, eyeToVertexDist0) + getTessLevel(eyeToVertexDist0, eyeToVertexDist1)) / 3; 
-
    }
 
 
@@ -55,10 +52,10 @@ int getTessLevel(float eyeVertex1, float eyeVertex2)
 	tessLevel = clamp(tessLevel, 1, 25);
 	return tessLevel;*/ //Exponential, big flan's
 
-    float c = 25.0;//constant value, start value
+    float c = 20.0;//constant value, start value
     float e = 2.718;//euler number
     float k = 0.0065;//scaling factor for the distance
     tessLevel = int(c*pow(e,-distance*k));
     tessLevel = clamp(tessLevel, 1, 100);
-    return tessLevel;
+    return tessLevel;//tweak at end
 }

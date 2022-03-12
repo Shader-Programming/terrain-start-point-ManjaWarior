@@ -80,20 +80,10 @@ void main()
    float up = (textureOffset(perlin_img, texCoordsES, ivec2(0,1)).r) * scale;
    float down = (textureOffset(perlin_img, texCoordsES, ivec2(0,-1)).r) * scale;
    
-   float top_right = right + up;
-   float top_left = left + up;
-   float bottom_right = right + down;
-   float bottom_left = left + down;
-   
-   
-   float trbr = top_right - bottom_right;
-   float tlbl = top_left - bottom_left;
+
    float lr = left - right;
    float ud = up - down;
-   vec3 normals_lrud = normalize(vec3(lr, 2.0, ud));
-   vec3 normals_diagnals = normalize(vec3(trbr, 2.0, tlbl));
-   
-   normalsES = normals_lrud+normals_diagnals;
+   normalsES = normalize(vec3(lr, 2.0, ud));
 
     // transform vertex to clip space
 	gl_Position = projection * view * model *vec4(posES, 1.0);

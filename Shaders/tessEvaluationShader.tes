@@ -48,30 +48,6 @@ void main()
    texCoordsES = interpolate2D(texCoordsTC[0], texCoordsTC[1], texCoordsTC[2]) ;
    posES = interpolate3D(posTC[0], posTC[1], posTC[2]) ;
    
-   /*float height = texture(heightMap, texCoordsES).x;
-   posES.y = height * scale;
-   
-   float right = (textureOffset(heightMap, texCoordsES, ivec2(1,0)).r) * scale;
-   float left = (textureOffset(heightMap, texCoordsES, ivec2(-1,0)).r) * scale;
-   float up = (textureOffset(heightMap, texCoordsES, ivec2(0,1)).r) * scale;
-   float down = (textureOffset(heightMap, texCoordsES, ivec2(0,-1)).r) * scale;
-   
-   float lr = left - right;
-   float ud = up - down;
-   normalsES = normalize(vec3(lr, 2.0, ud));//central difference method for normals*/
-   
-   /*vec3 right = vec3(posES.x+1, posES.y, posES.z);
-   vec3 left = vec3(posES.x-1, posES.y, posES.z);
-   vec3 up = vec3(posES.x, posES.y, posES.z+1);
-   vec3 down = vec3(posES.x, posES.y, posES.z-1);
-
-   float r = noise(right,octaves);
-   float l = noise(left,octaves);
-   float u = noise(up,octaves);
-   float d = noise(down,octaves);
-   normalsES = normalize(vec3((l-r), 2, (d-u)));*/
-
-   //posES.y = noise(posES, octaves);//working perlin
    float height = texture(perlin_img, texCoordsES).x;
    posES.y = height * scale;
    
