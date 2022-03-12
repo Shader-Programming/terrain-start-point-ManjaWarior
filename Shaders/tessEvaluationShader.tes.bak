@@ -60,7 +60,7 @@ void main()
    float ud = up - down;
    normalsES = normalize(vec3(lr, 2.0, ud));//central difference method for normals*/
    
-   vec3 right = vec3(posES.x+1, posES.y, posES.z);
+   /*vec3 right = vec3(posES.x+1, posES.y, posES.z);
    vec3 left = vec3(posES.x-1, posES.y, posES.z);
    vec3 up = vec3(posES.x, posES.y, posES.z+1);
    vec3 down = vec3(posES.x, posES.y, posES.z-1);
@@ -69,10 +69,31 @@ void main()
    float l = noise(left,octaves);
    float u = noise(up,octaves);
    float d = noise(down,octaves);
-   normalsES = normalize(vec3((l-r), 2, (d-u)));
+   normalsES = normalize(vec3((l-r), 2, (d-u)));*/
 
-   //posES.y = noise(posES, octaves);
-   posES.y = texture(perlin_img, texCoordsES).y;
+   //posES.y = noise(posES, octaves);//working perlin
+   float height = texture(perlin_img, texCoordsES).x;
+   posES.y = height * scale;
+   
+   float right = (textureOffset(perlin_img, texCoordsES, ivec2(1,0)).r) * scale;
+   float left = (textureOffset(perlin_img, texCoordsES, ivec2(-1,0)).r) * scale;
+   float up = (textureOffset(perlin_img, texCoordsES, ivec2(0,1)).r) * scale;
+   float down = (textureOffset(perlin_img, texCoordsES, ivec2(0,-1)).r) * scale;
+   
+   float top_right = right + up;
+   float top_left = left + up;
+   float bottom_right = right + down;
+   float bottom_left = left + down;
+   
+   
+   float trbr = top_right - bottom_right;
+   float tlbl = top_left - bottom_left;
+   float lr = left - right;
+   float ud = up - down;
+   vec3 normals_lrud = normalize(vec3(lr, 2.0, ud));
+   vec3 normals_diagnals = normalize(vec3(trbr, 2.0, tlbl));
+   
+   normalsES = normals_lrud+normals_diagnals;
 
     // transform vertex to clip space
 	gl_Position = projection * view * model *vec4(posES, 1.0);

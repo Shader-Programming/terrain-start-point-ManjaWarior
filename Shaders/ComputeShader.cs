@@ -8,14 +8,17 @@ float noise(vec3 position, int octaves);
 float snoise(vec3 x);
 float hash(float n);
 
-uniform int scale;
+uniform float scale;
 uniform int octaves;
 
 void main()
 {
-	vec4 pixel = vec4(1.0, 0.5, 0.0, 1.0);
-	float local_y = noise(gl_GlobalInvocationID.xyz, octaves);
-	ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.x, local_y);
+	ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);
+	
+	float pixelColour  = noise(vec3(pixel_coords.x, pixel_coords.y, 1.0), octaves);
+	
+	vec4 pixel = vec4(pixelColour, pixelColour, pixelColour, 1.0);
+	
 	imageStore(img_output, pixel_coords, pixel);
 } 
 

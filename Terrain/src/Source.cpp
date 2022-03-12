@@ -36,7 +36,7 @@ void setLightUniforms(Shader& shader, TextureManager* texMan);
 void updatePerFrameUniforms(Shader& shader);
 
 // camera
-Camera camera(glm::vec3(260,50,300));
+Camera camera(glm::vec3(260,100,300));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -90,7 +90,7 @@ int main()
 	setLightUniforms(shader, texMan);
 
 	compute.use();
-	compute.setInt("scale", 200);//higher scale, more spread apart pixels
+	compute.setFloat("scale", 1.0f);//higher scale, more spread apart pixels
 	//possible the wrong angle on the pixels?
 	compute.setInt("octaves", 10);
 	output_img = texMan->createTexture(512, 512);
@@ -110,13 +110,15 @@ int main()
 
 	    shader.use();
 		updatePerFrameUniforms(shader);
-		shader.setInt("perlin_img", output_img);
+		shader.setInt("perlin_img", 3);
+		glBindTexture(GL_TEXTURE_2D, output_img);
+		glActiveTexture(GL_TEXTURE3);
 
 		glBindVertexArray(terrainVAO);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glDrawArrays(GL_PATCHES, 0, terrain.getSize());
 
-		texMan->drawTexture(output_img);
+		//texMan->drawTexture(output_img);
 		
 		glfwSwapBuffers(window);
 		glfwPollEvents();
