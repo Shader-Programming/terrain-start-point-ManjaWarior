@@ -82,7 +82,7 @@ int main()
 	// simple vertex and fragment shader - add your own tess and geo shader
 	Shader shader("..\\shaders\\tessVert.vs", "..\\shaders\\phongDirFrag.fs", "..\\shaders\\FlatShadingGeo.gs", "..\\shaders\\tessControlShader.tcs", "..\\shaders\\tessEvaluationShader.tes");
 	Shader compute("..\\shaders\\ComputeShader.cs");
-	//Shader normalsCompute("..\\shaders\\normalsCompute.cs");
+	Shader normalsCompute("..\\shaders\\normalsCompute.cs");
 
 	//Terrain Constructor ; number of grids in width, number of grids in height, gridSize
 	Terrain terrain(50, 50,10);
@@ -100,15 +100,15 @@ int main()
 	glDispatchCompute(32, 16, 1);
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
-	/*normalsCompute.use();
-	normalsCompute.setFloat("scale", 1.0f);
-	normalsCompute.setInt("perlin_img", 0);
+	normalsCompute.use();
+	normalsCompute.setFloat("scale", 50.0f);
+	normalsCompute.setInt("perlin_img", 4);
 	glBindTexture(GL_TEXTURE_2D, output_img);
-	glActiveTexture(GL_TEXTURE0);
+	glActiveTexture(GL_TEXTURE4);
 	unsigned int normal_img = texMan->createTexture(512, 512);
 	glBindImageTexture(0, normal_img, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 	glDispatchCompute(32, 16, 1);
-	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);*/
+	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -129,7 +129,7 @@ int main()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glDrawArrays(GL_PATCHES, 0, terrain.getSize());
 
-		//texMan->drawTexture(output_img);
+		texMan->drawTexture(normal_img);
 		
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -202,7 +202,6 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 void setLightUniforms(Shader& tess, TextureManager* texMan) {//think about moving this stuff to terrain class, issue is currently accessing variables here such as the camera and screen values
 	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1200.0f);
 	glm::mat4 model = glm::mat4(1.0f);
-	unsigned int heightMap = texMan->loadTexture("..\\resources\\newPath\\Stone_Path_008_height.png");
 	unsigned int normalMap = texMan->loadTexture("..\\resources\\newPath\\Ground_Dirt_009_Normal.jpg");
 
 	tess.use();
@@ -221,14 +220,10 @@ void setLightUniforms(Shader& tess, TextureManager* texMan) {//think about movin
 	tess.setMat4("projection", projection);
 	tess.setMat4("model", model);
 
-	//height map
-	tess.setInt("heightMap", 0);
-	glBindTexture(GL_TEXTURE_2D, heightMap);
-	glActiveTexture(GL_TEXTURE1);
 	//normal mapping
-	tess.setInt("normalMap", 1);
+	tess.setInt("normalMap", 0);
 	glBindTexture(GL_TEXTURE_2D, normalMap);
-	glActiveTexture(GL_TEXTURE2);
+	glActiveTexture(GL_TEXTURE1);
 	tess.setInt("scale", 50); //scale of perlin noise generation 
 	tess.setInt("octaves", 10);//number of octaves in perlin noise
 

@@ -2,8 +2,6 @@
 
 layout(local_size_x = 16, local_size_y = 32, local_size_z = 1) in;
 layout (binding = 0, rgba32f) uniform image2D perlin_output;
-layout (binding = 0, rgba32f) uniform image2D normals_output;
-//stuff
 
 float noise(vec3 position, int octaves);
 float snoise(vec3 x);
