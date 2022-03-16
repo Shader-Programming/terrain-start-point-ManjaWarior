@@ -12,12 +12,16 @@ uniform float scale;
 void main()
 {
 	ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);
-
-	vec4 perlin = texture(perlin_img, pixel_coords);
+	
+	float u = pixel_coords.x/512;
+	float v = pixel_coords.y/512;
+	
+	vec2 uv = vec2(u,v);
+	
+	vec4 perlin = texture(perlin_img, uv);
 	vec3 normals = CDM(perlin_img, pixel_coords);
 
     vec4 pixel = vec4(normals.r, normals.g, normals.b, perlin.x);
-	vec4 normal_pixel = vec4(cross
     imageStore(normals_output, pixel_coords, pixel);
 } 
 
@@ -31,7 +35,6 @@ vec3 CDM(sampler2D perlin_img, ivec2 pixel_coords)
     
     float lr = left - right;
     float ud = up - down;
-	
     vec3 normalsCS = normalize(vec3(lr, 2.0, ud));
 	return normalsCS;
 }

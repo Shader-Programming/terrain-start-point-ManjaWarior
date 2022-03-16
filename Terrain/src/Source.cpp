@@ -92,8 +92,7 @@ int main()
 	setLightUniforms(shader, texMan);
 
 	compute.use();
-	compute.setFloat("scale", 1.0f);//higher scale, more spread apart pixels
-	//possible the wrong angle on the pixels?
+	compute.setFloat("scale", 1.0f);
 	compute.setInt("octaves", 10);
 	output_img = texMan->createTexture(512, 512);
 	glBindImageTexture(0, output_img, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
@@ -101,7 +100,7 @@ int main()
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
 	normalsCompute.use();
-	normalsCompute.setFloat("scale", 50.0f);
+	normalsCompute.setFloat("scale", 1.0f);
 	normalsCompute.setInt("perlin_img", 4);
 	glBindTexture(GL_TEXTURE_2D, output_img);
 	glActiveTexture(GL_TEXTURE4);
