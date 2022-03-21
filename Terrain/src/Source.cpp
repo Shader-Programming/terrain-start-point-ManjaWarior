@@ -24,7 +24,7 @@ const unsigned int SCR_HEIGHT = 900;
 glm::vec3 dirLightPos(1.4f, -.6f, 0.4f);
 
 unsigned int NormalMap = 0;
-unsigned int output_img; 
+//unsigned int output_img; 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -94,13 +94,13 @@ int main()
 	compute.use();
 	compute.setFloat("scale", 1.0f);
 	compute.setInt("octaves", 10);
-	output_img = texMan->createTexture(512, 512);
+	unsigned int output_img = texMan->createTexture(512, 512);
 	glBindImageTexture(0, output_img, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 	glDispatchCompute(32, 16, 1);
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
 	normalsCompute.use();
-	normalsCompute.setFloat("scale", 1.0f);
+	normalsCompute.setFloat("scale", 35.0f);
 	normalsCompute.setInt("perlin_img", 4);
 	glBindTexture(GL_TEXTURE_2D, output_img);
 	glActiveTexture(GL_TEXTURE4);

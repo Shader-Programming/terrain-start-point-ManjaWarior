@@ -13,8 +13,8 @@ void main()
 {
 	ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);
 	
-	float u = pixel_coords.x/512;
-	float v = pixel_coords.y/512;
+	float u = pixel_coords.x/512.0f;
+	float v = pixel_coords.y/512.0f;
 	
 	vec2 uv = vec2(u,v);
 	

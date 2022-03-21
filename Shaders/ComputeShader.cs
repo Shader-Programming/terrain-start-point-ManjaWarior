@@ -13,7 +13,7 @@ uniform int octaves;
 void main()
 {
 	ivec2 pixel_coords = ivec2(gl_GlobalInvocationID.xy);
-	float perlinPixelColour  = noise(vec3(pixel_coords.x, pixel_coords.y, 1.0), octaves);
+	float perlinPixelColour  = noise(vec3(pixel_coords.x, 0.0, pixel_coords.y), octaves);
 	vec4 pixel = vec4(perlinPixelColour, perlinPixelColour, perlinPixelColour, 1.0);
 	
 	imageStore(perlin_output, pixel_coords, pixel);
