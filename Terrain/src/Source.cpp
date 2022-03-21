@@ -91,10 +91,13 @@ int main()
 	shader.use();
 	setLightUniforms(shader, texMan);
 
+	unsigned int output_img = texMan->createTexture(512, 512);
+	unsigned int normal_img = texMan->createTexture(512, 512);
+
+
 	compute.use();
 	compute.setFloat("scale", 100.0f);
 	compute.setInt("octaves", 10);
-	unsigned int output_img = texMan->createTexture(512, 512);
 	glBindImageTexture(0, output_img, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 	glDispatchCompute((GLuint)32, (GLuint)16, 1);
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
@@ -102,9 +105,8 @@ int main()
 	normalsCompute.use();
 	normalsCompute.setFloat("scale", 1.0f);
 	normalsCompute.setInt("perlin_img", 4);
-	glBindTexture(GL_TEXTURE_2D, output_img);
 	glActiveTexture(GL_TEXTURE4);
-	unsigned int normal_img = texMan->createTexture(512, 512);
+	glBindTexture(GL_TEXTURE_2D, output_img);
 	glBindImageTexture(0, normal_img, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 	glDispatchCompute((GLuint)32, (GLuint)16, 1);
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
@@ -123,12 +125,15 @@ int main()
 		shader.setInt("perlin_img", 3);
 		glBindTexture(GL_TEXTURE_2D, output_img);
 		glActiveTexture(GL_TEXTURE3);
+		/*shader.setInt("normals_img", 5);
+		glBindTexture(GL_TEXTURE_2D, normal_img);
+		glActiveTexture(GL_TEXTURE5);*/
 
 		glBindVertexArray(terrainVAO);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glDrawArrays(GL_PATCHES, 0, terrain.getSize());
 
-		texMan->drawTexture(normal_img);
+		//texMan->drawTexture(normal_img);
 		
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -223,7 +228,7 @@ void setLightUniforms(Shader& tess, TextureManager* texMan) {//think about movin
 	tess.setInt("normalMap", 0);
 	glBindTexture(GL_TEXTURE_2D, normalMap);
 	glActiveTexture(GL_TEXTURE1);
-	tess.setInt("scale", 50); //scale of perlin noise generation 
+	tess.setInt("scale", 1); //scale of perlin noise generation 
 	tess.setInt("octaves", 10);//number of octaves in perlin noise
 
 	//fog stuff
