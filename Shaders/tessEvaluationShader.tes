@@ -62,7 +62,7 @@ void main()
    float ud = up - down;
    normalsES = normalize(vec3(lr, 2.0, ud));
 	
-	//normalsES = texture(normals_img, texCoordsES).rgb; // doesn't work for some reason
+	normalsES = texture(normals_img, texCoordsES).rgb * scale; // doesn't work for some reason
 	
     // transform vertex to clip space
 	gl_Position = projection * view * model *vec4(posES, 1.0);

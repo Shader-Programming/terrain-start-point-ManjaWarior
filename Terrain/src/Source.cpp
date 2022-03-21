@@ -125,9 +125,10 @@ int main()
 		shader.setInt("perlin_img", 3);
 		glBindTexture(GL_TEXTURE_2D, output_img);
 		glActiveTexture(GL_TEXTURE3);
-		/*shader.setInt("normals_img", 5);
+		shader.setInt("normals_img", 5);
+		glActiveTexture(GL_TEXTURE5);
 		glBindTexture(GL_TEXTURE_2D, normal_img);
-		glActiveTexture(GL_TEXTURE5);*/
+		
 
 		glBindVertexArray(terrainVAO);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
