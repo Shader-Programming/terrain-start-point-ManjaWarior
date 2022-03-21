@@ -92,21 +92,21 @@ int main()
 	setLightUniforms(shader, texMan);
 
 	compute.use();
-	compute.setFloat("scale", 1.0f);
+	compute.setFloat("scale", 100.0f);
 	compute.setInt("octaves", 10);
 	unsigned int output_img = texMan->createTexture(512, 512);
 	glBindImageTexture(0, output_img, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-	glDispatchCompute(32, 16, 1);
+	glDispatchCompute((GLuint)32, (GLuint)16, 1);
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
 	normalsCompute.use();
-	normalsCompute.setFloat("scale", 35.0f);
+	normalsCompute.setFloat("scale", 1.0f);
 	normalsCompute.setInt("perlin_img", 4);
 	glBindTexture(GL_TEXTURE_2D, output_img);
 	glActiveTexture(GL_TEXTURE4);
 	unsigned int normal_img = texMan->createTexture(512, 512);
 	glBindImageTexture(0, normal_img, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-	glDispatchCompute(32, 16, 1);
+	glDispatchCompute((GLuint)32, (GLuint)16, 1);
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
 	while (!glfwWindowShouldClose(window))
