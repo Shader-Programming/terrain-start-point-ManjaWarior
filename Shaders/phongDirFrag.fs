@@ -43,13 +43,13 @@ void main()
     
     vec3 colour = vec3(0.1);
 
-    if(height > 0.0 && height < 0.5)
+    if(height > 0.0 && height < 95.0)
     {
-        colour = vec3(mix(green, gray, smoothstep(0.6, 1.0, height)).rgb);
+        colour = vec3(mix(green, gray, smoothstep(95.6, 50.0, height)).rgb);
     }
-	else if (height >= 0.5)
+	else if (height >= 95.0)
 	{
-		colour = vec3(mix(green, red, smoothstep(0.3, 2.0, height)).rgb);//smooth steps may need tuning
+		colour = vec3(mix(green, red, smoothstep(92.5, 110.0, height)).rgb);//smooth steps may need tuning
 	}
     else
     {
@@ -63,7 +63,8 @@ void main()
 	float b = (blendPercent.x + blendPercent.y + blendPercent.z);
 	blendPercent = blendPercent/vec3(b);
 	
-	vec3 norm  = texture(normalMap, texCoordsGS * 10).xyz;
+	//vec3 norm  = texture(normalMap, texCoordsGS * 10).xyz;
+	vec3 norm = normalsGS;
 	norm = normalize(gTBN*(norm*2.0 - 1.0)) ;//needed for diffuse lighting
 	
 	//tri planer normal mapping

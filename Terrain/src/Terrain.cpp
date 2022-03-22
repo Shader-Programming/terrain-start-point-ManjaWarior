@@ -9,6 +9,7 @@ Terrain::Terrain(int widthIn, int heightIn, int stepSizeIn)
 	stepSize = stepSizeIn;
 	makeVertices(&vertices);
 
+	//assignComputeShadersTextures();
 }
 
 Terrain::Terrain() {
@@ -16,7 +17,6 @@ Terrain::Terrain() {
 	height = 50;
 	stepSize = 10;
 	makeVertices(&vertices);
-
 }
 
 unsigned int Terrain::getVAO() {
@@ -48,6 +48,40 @@ int Terrain::getSize() {
 
 std::vector<float> Terrain::getVertices() {
 	return vertices;
+}
+
+void Terrain::assignComputeShadersTextures()
+{
+	//output_img = texMan->createTexture(512, 512);
+	//normal_img = texMan->createTexture(512, 512);
+
+	//compute->use();
+	//compute->setFloat("scale", 100.0f);
+	//compute->setInt("octaves", 10);
+	//glBindImageTexture(0, output_img, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+	//glDispatchCompute((GLuint)32, (GLuint)16, 1);
+	//glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+	////compute shader perlin noise
+	//glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D, output_img);
+
+	//normalsCompute->use();
+	//normalsCompute->setFloat("scale", 1.0f);
+	//normalsCompute->setInt("perlin_img", 0);
+	//glBindImageTexture(0, normal_img, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+	//glDispatchCompute((GLuint)32, (GLuint)16, 1);
+	//glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+	//glActiveTexture(GL_TEXTURE1);
+	//glBindTexture(GL_TEXTURE_2D, normal_img);
+}
+
+void Terrain::drawTerrain()
+{
+	glBindVertexArray(getVAO());
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glDrawArrays(GL_PATCHES, 0, getSize());
 }
 
 void Terrain::makeVertices(std::vector<float> *vertices) {
@@ -108,21 +142,3 @@ void Terrain::makeVertex(int x, int y, std::vector<float> *vertices) {
 
 
 }
-
-/*double Terrain::cycleOctaves(glm::vec3 pos, int numOctaves)
-{
-	float total = 0.0f;
-	float frequency = 0.005f;
-	float maxAmplitude = 0.0f;
-	float amplitude = 100.0f;
-	for (int i = 0; i < numOctaves; i++)
-	{
-		double x = pos.x * frequency;
-		double y = pos.y * frequency;
-		total += perlin.noise(x,y,0.1) * amplitude;
-		frequency *= 2.0f;
-		amplitude /= 2.0f;
-		maxAmplitude = amplitude;
-	}
-	return (total / maxAmplitude);
-}*/

@@ -36,10 +36,10 @@
     <ClInclude Include="include\PerlinNoise.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Header.h">
+    <ClInclude Include="include\TextureManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\TextureManager.h">
+    <ClInclude Include="include\Source.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

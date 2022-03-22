@@ -28,11 +28,9 @@ struct DirLight {
 uniform DirLight dirLight;
 uniform Material mat ;
 uniform vec3 viewPos ;
-
 uniform sampler2D normalMap;
-
 uniform int scale;
-
+uniform int Map;
 uniform vec3 sky;
 
 void main()
@@ -45,18 +43,18 @@ void main()
     
     vec3 colour = vec3(0.1);
 
-    if(height > 0.0 && height < 0.5)
+    if(height > 0.0 && height < 95.0)
     {
-        colour = vec3(mix(green, gray, smoothstep(0.6, 1.0, height)).rgb);
+        colour = vec3(mix(green, gray, smoothstep(95.6, 50.0, height)).rgb);
     }
-	else if (height >= 0.5)
+	else if (height >= 95.0)
 	{
-		colour = vec3(mix(green, red, smoothstep(0.3, 2.0, height)).rgb);
+		colour = vec3(mix(green, red, smoothstep(92.5, 110.0, height)).rgb);//smooth steps may need tuning
 	}
     else
     {
         colour = colour;
-    } //this will do the colour shading from the video
+    } //this will do the colour shading
 	
 	
 	//tri planer for normals
@@ -66,7 +64,7 @@ void main()
 	blendPercent = blendPercent/vec3(b);
 	
 	vec3 norm  = texture(normalMap, texCoordsGS * 10).xyz;
-	norm = normalize(gTBN*(norm*2.0 - 1.0)) ;
+	norm = normalize(gTBN*(norm*2.0 - 1.0)) ;//needed for diffuse lighting
 	
 	//tri planer normal mapping
 	vec4 xaxisNormal = texture(normalMap, posGS.yz);
@@ -76,25 +74,44 @@ void main()
 	vec4 tpTexNorm = xaxisNormal*blendPercent.x + yaxisNormal*blendPercent.y + zaxisNormal*blendPercent.z;
 	
 	
-	//vec3 norm = flatNormalsGS; //will swap to flat shading, not quite right however
-	
-	
+	vec3 flatNorms = flatNormalsGS;
     vec3 viewDir = normalize(viewPos - posGS);
 	
+	if(Map == 0)//tri-planer normal mapping
+	{
+		//Lighting
+		vec3 ambient = dirLight.ambient * mat.ambient;     
+		vec3 lightDir = normalize(-dirLight.direction);
+		// diffuse shading
+		float diff = max(dot(norm, -dirLight.direction), 0.0);
+		// specular shading
+		vec3 reflectDir = reflect(-dirLight.direction, tpTexNorm.rgb);
+		float spec = pow(max(dot(viewDir, reflectDir), 0.0), mat.shininess);
+		// combine results
 	
-	//Lighting
-	vec3 ambient = dirLight.ambient * mat.ambient;     
-    vec3 lightDir = normalize(-dirLight.direction);
-    // diffuse shading
-    float diff = max(dot(norm, -dirLight.direction), 0.0);
-    // specular shading
-    vec3 reflectDir = reflect(-dirLight.direction, tpTexNorm.rgb);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), mat.shininess);
-    // combine results
-   
-    vec3 diffuse  = dirLight.diffuse  * (diff * mat.diffuse);
-    vec3 specular = dirLight.specular * (spec * mat.specular);
-    FragColor = vec4((ambient + diffuse + specular) * colour ,1.0f);
-	FragColor = mix(vec4(sky,1.0), FragColor, visibilityGS);//fog
+		vec3 diffuse  = dirLight.diffuse  * (diff * mat.diffuse);
+		vec3 specular = dirLight.specular * (spec * mat.specular);
+		FragColor = vec4((ambient + diffuse + specular) * colour ,1.0f);
+		FragColor = mix(vec4(sky,1.0), FragColor, visibilityGS);//fog
+	}
+	else if (Map == 1)
+	{
+		//Lighting
+		vec3 ambient = dirLight.ambient * mat.ambient;     
+		vec3 lightDir = normalize(-dirLight.direction);
+		// diffuse shading
+		float diff = max(dot(flatNorms, -dirLight.direction), 0.0);
+		// specular shading
+		vec3 reflectDir = reflect(-dirLight.direction, flatNorms);
+		float spec = pow(max(dot(viewDir, reflectDir), 0.0), mat.shininess);
+		// combine results
+	
+		vec3 diffuse  = dirLight.diffuse  * (diff * mat.diffuse);
+		vec3 specular = dirLight.specular * (spec * mat.specular);
+		FragColor = vec4((ambient + diffuse + specular) * colour ,1.0f);
+		FragColor = mix(vec4(sky,1.0), FragColor, visibilityGS);//fog
+	}
+	
+
 }
 

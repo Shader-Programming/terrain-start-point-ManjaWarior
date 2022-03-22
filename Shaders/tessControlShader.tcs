@@ -47,10 +47,6 @@ int getTessLevel(float eyeVertex1, float eyeVertex2)
 {
     int tessLevel = 0;
     float distance = (eyeVertex1 + eyeVertex2) / 2; //adds the 2 edges and divides by 2
-	
-	/*tessLevel = 25 / max(int(distance / 2), 1);
-	tessLevel = clamp(tessLevel, 1, 25);
-	return tessLevel;*/ //Exponential, big flan's
 
     float c = 20.0;//constant value, start value
     float e = 2.718;//euler number
