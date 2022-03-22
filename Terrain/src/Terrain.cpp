@@ -20,25 +20,25 @@ Terrain::Terrain() {
 }
 
 unsigned int Terrain::getVAO() {
-	
-		glGenVertexArrays(1, &VAO);
-		glGenBuffers(1, &VBO);
-		glBindVertexArray(VAO);
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, (vertices.size() * sizeof(GLfloat)), vertices.data(), GL_STATIC_DRAW);
 
-		//xyz
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-		glEnableVertexAttribArray(0);
-		//texture
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-		glEnableVertexAttribArray(1);
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, (vertices.size() * sizeof(GLfloat)), vertices.data(), GL_STATIC_DRAW);
+
+	//xyz
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	//texture
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
 
 
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindVertexArray(0);
-	
-		return VAO;
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	return VAO;
 }
 
 int Terrain::getSize() {
@@ -50,31 +50,31 @@ std::vector<float> Terrain::getVertices() {
 	return vertices;
 }
 
-void Terrain::assignComputeShadersTextures()
+void Terrain::assignTextures(unsigned int output_img, unsigned int normal_img, unsigned int normalMap)
 {
-	//output_img = texMan->createTexture(512, 512);
-	//normal_img = texMan->createTexture(512, 512);
+	compute->use();
+	compute->setFloat("scale", 100.0f);
+	compute->setInt("octaves", 10);
+	glBindImageTexture(0, output_img, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+	glDispatchCompute((GLuint)32, (GLuint)16, 1);
+	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
-	//compute->use();
-	//compute->setFloat("scale", 100.0f);
-	//compute->setInt("octaves", 10);
-	//glBindImageTexture(0, output_img, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-	//glDispatchCompute((GLuint)32, (GLuint)16, 1);
-	//glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+	//compute shader perlin noise
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, output_img);
 
-	////compute shader perlin noise
-	//glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_2D, output_img);
+	normalsCompute->use();
+	normalsCompute->setFloat("scale", 1.0f);
+	normalsCompute->setInt("perlin_img", 0);
+	glBindImageTexture(0, normal_img, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+	glDispatchCompute((GLuint)32, (GLuint)16, 1);
+	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
-	//normalsCompute->use();
-	//normalsCompute->setFloat("scale", 1.0f);
-	//normalsCompute->setInt("perlin_img", 0);
-	//glBindImageTexture(0, normal_img, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-	//glDispatchCompute((GLuint)32, (GLuint)16, 1);
-	//glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, normal_img);
 
-	//glActiveTexture(GL_TEXTURE1);
-	//glBindTexture(GL_TEXTURE_2D, normal_img);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, normalMap);
 }
 
 void Terrain::drawTerrain()
@@ -84,7 +84,7 @@ void Terrain::drawTerrain()
 	glDrawArrays(GL_PATCHES, 0, getSize());
 }
 
-void Terrain::makeVertices(std::vector<float> *vertices) {
+void Terrain::makeVertices(std::vector<float>* vertices) {
 	/* triangle a b c
 		   b
 		   | \
@@ -126,7 +126,7 @@ void Terrain::makeVertices(std::vector<float> *vertices) {
 	}
 }
 
-void Terrain::makeVertex(int x, int y, std::vector<float> *vertices) {
+void Terrain::makeVertex(int x, int y, std::vector<float>* vertices) {
 
 	//x y z position
 	vertices->push_back((float)x); //xPos
@@ -137,8 +137,8 @@ void Terrain::makeVertex(int x, int y, std::vector<float> *vertices) {
 	vertices->push_back((float)y); //zPos
 
    // add texture coords
-	vertices->push_back((float)x / (width*stepSize));
-	vertices->push_back((float)y / (height*stepSize));
+	vertices->push_back((float)x / (width * stepSize));
+	vertices->push_back((float)y / (height * stepSize));
 
 
 }
