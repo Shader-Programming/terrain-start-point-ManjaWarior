@@ -24,12 +24,11 @@ const unsigned int SCR_HEIGHT = 900;
 glm::vec3 dirLightPos(1.4f, -.6f, 0.4f);
 
 unsigned int NormalMap = 0;
-//unsigned int output_img; 
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-void processInput(GLFWwindow *window);
+void processInput(GLFWwindow* window);
 //unsigned int loadTexture2(char const * path);
 void setVAO(vector <float> vertices);
 
@@ -37,13 +36,10 @@ void setLightUniforms(Shader& shader, TextureManager* texMan);
 void updatePerFrameUniforms(Shader& shader);
 
 // camera
-Camera camera(glm::vec3(260,100,300));
+Camera camera(glm::vec3(260, 100, 300));
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
-
-//arrays
-unsigned int terrainVAO;
 
 // timing
 float deltaTime = 0.0f;
@@ -85,15 +81,15 @@ int main()
 	Shader normalsCompute("..\\shaders\\normalsCompute.cs");
 
 	//Terrain Constructor ; number of grids in width, number of grids in height, gridSize
-	Terrain terrain(50, 50,10);
-	terrainVAO = terrain.getVAO();
+	Terrain* terrain = new Terrain(50, 50, 10);
 
 	shader.use();
 	setLightUniforms(shader, texMan);
 
+	unsigned int normalMap = texMan->loadTexture("..\\resources\\newPath\\Ground_Dirt_009_Normal.jpg");
+
 	unsigned int output_img = texMan->createTexture(512, 512);
 	unsigned int normal_img = texMan->createTexture(512, 512);
-
 
 	compute.use();
 	compute.setFloat("scale", 100.0f);
@@ -102,14 +98,29 @@ int main()
 	glDispatchCompute((GLuint)32, (GLuint)16, 1);
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
 
+	//compute shader perlin noise
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, output_img);
+
 	normalsCompute.use();
 	normalsCompute.setFloat("scale", 1.0f);
-	normalsCompute.setInt("perlin_img", 4);
-	glActiveTexture(GL_TEXTURE4);
-	glBindTexture(GL_TEXTURE_2D, output_img);
+	normalsCompute.setInt("perlin_img", 0);
 	glBindImageTexture(0, normal_img, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 	glDispatchCompute((GLuint)32, (GLuint)16, 1);
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+	//compute shader normal map
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, normal_img);
+
+	//normal mapping
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, normalMap);
+	
+	shader.use();
+	shader.setInt("perlin_img", 0);
+	shader.setInt("normals_img", 1);
+	shader.setInt("normalMap", 2);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -120,22 +131,13 @@ int main()
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	    shader.use();
 		updatePerFrameUniforms(shader);
-		shader.setInt("perlin_img", 3);
-		glBindTexture(GL_TEXTURE_2D, output_img);
-		glActiveTexture(GL_TEXTURE3);
-		shader.setInt("normals_img", 5);
-		glActiveTexture(GL_TEXTURE5);
-		glBindTexture(GL_TEXTURE_2D, normal_img);
-		
 
-		glBindVertexArray(terrainVAO);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glDrawArrays(GL_PATCHES, 0, terrain.getSize());
+		shader.use();
+		terrain->drawTerrain();
 
 		//texMan->drawTexture(normal_img);
-		
+
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
@@ -146,7 +148,7 @@ int main()
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
-void processInput(GLFWwindow *window)
+void processInput(GLFWwindow* window)
 {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
@@ -207,7 +209,6 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 void setLightUniforms(Shader& tess, TextureManager* texMan) {//think about moving this stuff to terrain class, issue is currently accessing variables here such as the camera and screen values
 	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1200.0f);
 	glm::mat4 model = glm::mat4(1.0f);
-	unsigned int normalMap = texMan->loadTexture("..\\resources\\newPath\\Ground_Dirt_009_Normal.jpg");
 
 	tess.use();
 	//light properties
@@ -225,10 +226,6 @@ void setLightUniforms(Shader& tess, TextureManager* texMan) {//think about movin
 	tess.setMat4("projection", projection);
 	tess.setMat4("model", model);
 
-	//normal mapping
-	tess.setInt("normalMap", 0);
-	glBindTexture(GL_TEXTURE_2D, normalMap);
-	glActiveTexture(GL_TEXTURE1);
 	tess.setInt("scale", 1); //scale of perlin noise generation 
 	tess.setInt("octaves", 10);//number of octaves in perlin noise
 
@@ -252,7 +249,3 @@ void updatePerFrameUniforms(Shader& tess)
 	tess.setVec3("viewPos", camera.Position);
 	tess.setInt("Map", NormalMap);
 }
-
-
-
-

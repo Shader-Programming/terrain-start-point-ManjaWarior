@@ -19,9 +19,8 @@ uniform mat4 projection;
 
 uniform vec3 viewPos;
 
-uniform sampler2D heightMap;
-
 uniform sampler2D perlin_img;
+
 uniform sampler2D normals_img;
 
 uniform int scale;
@@ -46,23 +45,18 @@ void main()
     // interpolate the normal and xyz position using the linear interpolation function
     // use 3D because they are in three dimensions; 2D also included for uv texture coordinates
 
-   texCoordsES = interpolate2D(texCoordsTC[0], texCoordsTC[1], texCoordsTC[2]) ;
-   posES = interpolate3D(posTC[0], posTC[1], posTC[2]) ;
-   
-   float height = texture(perlin_img, texCoordsES).x;
-   posES.y = height * scale;
-   
-   float right = (textureOffset(perlin_img, texCoordsES, ivec2(1,0)).r) * scale;
-   float left = (textureOffset(perlin_img, texCoordsES, ivec2(-1,0)).r) * scale;
-   float up = (textureOffset(perlin_img, texCoordsES, ivec2(0,1)).r) * scale;
-   float down = (textureOffset(perlin_img, texCoordsES, ivec2(0,-1)).r) * scale;
-   
-
-   float lr = left - right;
-   float ud = up - down;
-   //normalsES = normalize(vec3(lr, 2.0, ud));
+    texCoordsES = interpolate2D(texCoordsTC[0], texCoordsTC[1], texCoordsTC[2]) ;
+    posES = interpolate3D(posTC[0], posTC[1], posTC[2]) ;
+    
+    float height = texture(perlin_img, texCoordsES).x;
+    posES.y = height * scale;
+	//
+	normalsES = texture(normals_img, texCoordsES).rgb * scale; 
 	
-	normalsES = texture(normals_img, texCoordsES).rgb * scale; // doesn't work for some reason
+	//vec4 map = texture(normals_img, texCoordsES);
+	//
+	//normalsES = map.rgb;
+	//posES.y = map.a;
 	
     // transform vertex to clip space
 	gl_Position = projection * view * model *vec4(posES, 1.0);

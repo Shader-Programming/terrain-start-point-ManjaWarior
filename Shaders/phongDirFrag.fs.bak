@@ -49,7 +49,7 @@ void main()
     }
 	else if (height >= 95.0)
 	{
-		colour = vec3(mix(green, red, smoothstep(95.3, 110.0, height)).rgb);//smooth steps may need tuning
+		colour = vec3(mix(green, red, smoothstep(92.5, 110.0, height)).rgb);//smooth steps may need tuning
 	}
     else
     {
