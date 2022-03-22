@@ -20,25 +20,25 @@ Terrain::Terrain() {
 }
 
 unsigned int Terrain::getVAO() {
+	
+		glGenVertexArrays(1, &VAO);
+		glGenBuffers(1, &VBO);
+		glBindVertexArray(VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, (vertices.size() * sizeof(GLfloat)), vertices.data(), GL_STATIC_DRAW);
 
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, (vertices.size() * sizeof(GLfloat)), vertices.data(), GL_STATIC_DRAW);
-
-	//xyz
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-	//texture
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
+		//xyz
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(0);
+		//texture
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(1);
 
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-
-	return VAO;
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
+	
+		return VAO;
 }
 
 int Terrain::getSize() {
@@ -84,7 +84,7 @@ void Terrain::drawTerrain()
 	glDrawArrays(GL_PATCHES, 0, getSize());
 }
 
-void Terrain::makeVertices(std::vector<float>* vertices) {
+void Terrain::makeVertices(std::vector<float> *vertices) {
 	/* triangle a b c
 		   b
 		   | \
@@ -126,7 +126,7 @@ void Terrain::makeVertices(std::vector<float>* vertices) {
 	}
 }
 
-void Terrain::makeVertex(int x, int y, std::vector<float>* vertices) {
+void Terrain::makeVertex(int x, int y, std::vector<float> *vertices) {
 
 	//x y z position
 	vertices->push_back((float)x); //xPos
@@ -137,8 +137,8 @@ void Terrain::makeVertex(int x, int y, std::vector<float>* vertices) {
 	vertices->push_back((float)y); //zPos
 
    // add texture coords
-	vertices->push_back((float)x / (width * stepSize));
-	vertices->push_back((float)y / (height * stepSize));
+	vertices->push_back((float)x / (width*stepSize));
+	vertices->push_back((float)y / (height*stepSize));
 
 
 }

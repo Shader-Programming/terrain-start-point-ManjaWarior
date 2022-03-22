@@ -77,8 +77,6 @@ int main()
 
 	// simple vertex and fragment shader - add your own tess and geo shader
 	Shader shader("..\\shaders\\tessVert.vs", "..\\shaders\\phongDirFrag.fs", "..\\shaders\\FlatShadingGeo.gs", "..\\shaders\\tessControlShader.tcs", "..\\shaders\\tessEvaluationShader.tes");
-	//Shader compute("..\\shaders\\ComputeShader.cs");
-	//Shader normalsCompute("..\\shaders\\normalsCompute.cs");
 
 	//Terrain Constructor ; number of grids in width, number of grids in height, gridSize
 	Terrain* terrain = new Terrain(50, 50, 10);
@@ -87,36 +85,8 @@ int main()
 	setLightUniforms(shader, texMan);
 
 	unsigned int normalMap = texMan->loadTexture("..\\resources\\newPath\\Ground_Dirt_009_Normal.jpg");
-
 	unsigned int output_img = texMan->createTexture(512, 512);
 	unsigned int normal_img = texMan->createTexture(512, 512);
-
-	//compute.use();
-	//compute.setFloat("scale", 100.0f);
-	//compute.setInt("octaves", 10);
-	//glBindImageTexture(0, output_img, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-	//glDispatchCompute((GLuint)32, (GLuint)16, 1);
-	//glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-
-	////compute shader perlin noise
-	//glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_2D, output_img);
-
-	//normalsCompute.use();
-	//normalsCompute.setFloat("scale", 1.0f);
-	//normalsCompute.setInt("perlin_img", 0);
-	//glBindImageTexture(0, normal_img, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-	//glDispatchCompute((GLuint)32, (GLuint)16, 1);
-	//glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
-
-	////compute shader normal map
-	//glActiveTexture(GL_TEXTURE1);
-	//glBindTexture(GL_TEXTURE_2D, normal_img);
-
-
-	//normal mapping
-	/*glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, normalMap);*/
 
 	terrain->assignTextures(output_img, normal_img, normalMap);
 
@@ -131,7 +101,6 @@ int main()
 
 		updatePerFrameUniforms(shader);
 
-		shader.use();
 		terrain->drawTerrain();
 
 		//texMan->drawTexture(normal_img);
