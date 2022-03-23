@@ -63,8 +63,7 @@ void main()
 	float b = (blendPercent.x + blendPercent.y + blendPercent.z);
 	blendPercent = blendPercent/vec3(b);
 	
-	//vec3 norm  = texture(normalMap, texCoordsGS * 10).xyz;
-	vec3 norm = normalsGS;
+	vec3 norm  = texture(normalMap, texCoordsGS * 10).xyz;
 	norm = normalize(gTBN*(norm*2.0 - 1.0)) ;//needed for diffuse lighting
 	
 	//tri planer normal mapping
