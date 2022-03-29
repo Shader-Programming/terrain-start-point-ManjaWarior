@@ -183,6 +183,9 @@ void setLightUniforms(Shader& tess, TextureManager* texMan) {//think about movin
 	tess.setInt("normals_img", 1);
 	tess.setInt("normalMap", 2);
 
+	glEnable(GL_CLIP_DISTANCE0);
+	glm::vec4 plane = glm::vec4(0, 1, 0, -3);
+
 	//light properties
 	tess.setVec3("dirLight.direction", dirLightPos);
 	tess.setVec3("dirLight.ambient", 0.5f, 0.5f, 0.5f);
