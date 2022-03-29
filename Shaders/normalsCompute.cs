@@ -31,10 +31,20 @@ vec3 CDM(sampler2D perlin_img, vec2 pixel_coords)
     float left = (textureOffset(perlin_img, pixel_coords, ivec2(-1,0)).r) * scale;
     float up = (textureOffset(perlin_img, pixel_coords, ivec2(0,1)).r) * scale;
     float down = (textureOffset(perlin_img, pixel_coords, ivec2(0,-1)).r) * scale;
-    
-    
-    float lr = left - right;
+
+	float topRight = (textureOffset(perlin_img, pixel_coords, ivec2(1, 1)).r) * scale;
+	float topLeft = (textureOffset(perlin_img, pixel_coords, ivec2(-1, 1)).r) * scale;
+	float bottomRight = (textureOffset(perlin_img, pixel_coords, ivec2(1, -1)).r) * scale;
+	float bottomLeft = (textureOffset(perlin_img, pixel_coords, ivec2(-1, -1)).r) * scale;
+
+	float centre1 = topLeft - bottomRight;
+	float centre2 = topRight - bottomLeft;
+
+	float lr = left - right;
     float ud = up - down;
-    vec3 normalsCS = normalize(vec3(lr, 2.0, ud));
+
+    vec3 normals = normalize(vec3(lr, 2.0, ud));
+	vec3 diagnalNormals = normalize(vec3(centre1, 2.0, centre2));
+	vec3 normalsCS = normalize(normals + diagnalNormals);
 	return normalsCS;
 }

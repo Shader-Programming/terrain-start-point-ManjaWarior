@@ -73,45 +73,32 @@ void main()
 
 	vec4 tpTexNorm = xaxisNormal*blendPercent.x + yaxisNormal*blendPercent.y + zaxisNormal*blendPercent.z;
 	
-	
-	vec3 flatNorms = flatNormalsGS;
+	if(Map == 0)
+	{
+		norm = norm;
+	}
+	else if(Map == 1)
+	{
+		norm = flatNormalsGS;
+	}
+
     vec3 viewDir = normalize(viewPos - posGS);
 	
-	if(Map == 0)//tri-planer normal mapping
-	{
-		//Lighting
-		vec3 ambient = dirLight.ambient * mat.ambient;     
-		vec3 lightDir = normalize(-dirLight.direction);
-		// diffuse shading
-		float diff = max(dot(norm, -dirLight.direction), 0.0);
-		// specular shading
-		vec3 reflectDir = reflect(-dirLight.direction, tpTexNorm.rgb);
-		float spec = pow(max(dot(viewDir, reflectDir), 0.0), mat.shininess);
-		// combine results
+
+	//Lighting
+	vec3 ambient = dirLight.ambient * mat.ambient;     
+	vec3 lightDir = normalize(-dirLight.direction);
+	// diffuse shading
+	float diff = max(dot(norm, -dirLight.direction), 0.0);
+	// specular shading
+	vec3 reflectDir = reflect(-dirLight.direction, tpTexNorm.rgb);
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), mat.shininess);
+	// combine results
 	
-		vec3 diffuse  = dirLight.diffuse  * (diff * mat.diffuse);
-		vec3 specular = dirLight.specular * (spec * mat.specular);
-		FragColor = vec4((ambient + diffuse + specular) * colour ,1.0f);
-		FragColor = mix(vec4(sky,1.0), FragColor, visibilityGS);//fog
-	}
-	else if (Map == 1)
-	{
-		//Lighting
-		vec3 ambient = dirLight.ambient * mat.ambient;     
-		vec3 lightDir = normalize(-dirLight.direction);
-		// diffuse shading
-		float diff = max(dot(flatNorms, -dirLight.direction), 0.0);
-		// specular shading
-		vec3 reflectDir = reflect(-dirLight.direction, flatNorms);
-		float spec = pow(max(dot(viewDir, reflectDir), 0.0), mat.shininess);
-		// combine results
-	
-		vec3 diffuse  = dirLight.diffuse  * (diff * mat.diffuse);
-		vec3 specular = dirLight.specular * (spec * mat.specular);
-		FragColor = vec4((ambient + diffuse + specular) * colour ,1.0f);
-		FragColor = mix(vec4(sky,1.0), FragColor, visibilityGS);//fog
-	}
-	
+	vec3 diffuse  = dirLight.diffuse  * (diff * mat.diffuse);
+	vec3 specular = dirLight.specular * (spec * mat.specular);
+	FragColor = vec4((ambient + diffuse + specular) * colour ,1.0f);
+	FragColor = mix(vec4(sky,1.0), FragColor, visibilityGS);//fog
 
 }
 

@@ -173,7 +173,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	camera.ProcessMouseScroll(yoffset);
 }
 
-void setLightUniforms(Shader& tess, TextureManager* texMan) {//think about moving this stuff to terrain class, issue is currently accessing variables here such as the camera and screen values
+void setLightUniforms(Shader& tess, TextureManager* texMan) {//think about moving this stuff to terrain class, issue is currently aterrain even with all GLM header files cannot use perspective 
 	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1200.0f);
 	glm::mat4 model = glm::mat4(1.0f);
 

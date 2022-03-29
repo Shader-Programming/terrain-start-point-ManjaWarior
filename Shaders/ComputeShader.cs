@@ -9,6 +9,7 @@ float hash(float n);
 
 uniform float scale;
 uniform int octaves;
+uniform float terrainHash;
 
 void main()
 {
@@ -21,7 +22,7 @@ void main()
 
 
 float hash(float n) {
-    return fract(sin(n) * 753.5453123);
+    return fract(sin(n) * 753.5453123 + terrainHash);
 }
 
 float snoise(vec3 x)
