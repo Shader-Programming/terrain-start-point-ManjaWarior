@@ -19,7 +19,6 @@ uniform mat4 projection;
 
 uniform vec3 viewPos;
 
-uniform sampler2D perlin_img;
 uniform sampler2D normals_img;
 
 uniform int scale;
@@ -49,18 +48,8 @@ void main()
 	
 	vec4 map = texture(normals_img, texCoordsES);
 	
-	//normalsES = map.rgb;
+	normalsES = map.rgb;
 	posES.y = map.a;
-	
-	float right = (textureOffset(perlin_img, texCoordsES, ivec2(1,0)).r) * scale;
-    float left = (textureOffset(perlin_img, texCoordsES, ivec2(-1,0)).r) * scale;
-    float up = (textureOffset(perlin_img, texCoordsES, ivec2(0,1)).r) * scale;
-    float down = (textureOffset(perlin_img, texCoordsES, ivec2(0,-1)).r) * scale;
-    
-    
-    float lr = left - right;
-    float ud = up - down;
-    normalsES = normalize(vec3(lr, 2.0, ud));
 	
     // transform vertex to clip space
 	gl_Position = projection * view * model *vec4(posES, 1.0);
