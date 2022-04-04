@@ -71,6 +71,14 @@ void Water::renderWater(unsigned int& reflectionTex, unsigned int& refractionTex
     glDrawArrays(GL_PATCHES, 0, vertices.size());
 }
 
+void Water::assignTextures(unsigned int normalMap, unsigned int DuDvMap)
+{
+    glActiveTexture(GL_TEXTURE3);
+    glBindTexture(GL_TEXTURE_2D, normalMap);
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, DuDvMap);
+}
+
 void Water::MakeVertex(int x, int y, std::vector<float>* vertices)
 {
     //Pos

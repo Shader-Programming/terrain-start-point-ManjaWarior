@@ -13,6 +13,7 @@ public:
     void createWater();
     void renderWater(unsigned int& reflection, unsigned int& refraction);
     Shader* waterShader = new Shader("..\\shaders\\water\\Water.vs", "..\\shaders\\water\\Water.fs", "..\\shaders\\water\\Water.gs", "..\\shaders\\water\\Water.tcs", "..\\shaders\\water\\Water.tes");
+    void assignTextures(unsigned int normalMap, unsigned int DuDvMap);
 private:
     float height;
     float width;
