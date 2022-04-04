@@ -54,6 +54,10 @@ bool firstMouse = true;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
+glm::mat4 view = camera.GetViewMatrix();
+glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1200.0f);
+glm::mat4 model = glm::mat4(1.0f);
+
 int main()
 {
 	glfwInit();
@@ -82,7 +86,7 @@ int main()
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
-	//setWaterFBOs();
+	setWaterFBOs();
 
 	TextureManager* texMan = new TextureManager();
 
@@ -120,15 +124,15 @@ int main()
 		shader.use();
 		terrain->drawTerrain();
 
-		//glEnable(GL_CLIP_DISTANCE0);
-		//reflectionPass(terrain, shader);
-		//refractionPass(terrain, shader);
-		//glDisable(GL_CLIP_DISTANCE0);
-		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glEnable(GL_CLIP_DISTANCE0);
+		reflectionPass(terrain, shader);
+		refractionPass(terrain, shader);
+		glDisable(GL_CLIP_DISTANCE0);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		//water.waterShader->use();
-		//water.waterShader->setFloat("time", glfwGetTime() * 0.5);
-		//water.renderWater(reflectionTex, refractionTex);
+		water.waterShader->use();
+		water.waterShader->setFloat("time", glfwGetTime() * 0.5);
+		water.renderWater(reflectionTex, refractionTex);
 
 
 		//texMan->drawTexture(normal_img);
@@ -202,8 +206,8 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 }
 
 void setLightUniforms(Shader& tess, Shader* waterShader) {//think about moving this stuff to terrain class, issue is currently aterrain even with all GLM header files cannot use perspective 
-	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1200.0f);
-	glm::mat4 model = glm::mat4(1.0f);
+	projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1200.0f);
+	model = glm::mat4(1.0f);
 
 	tess.use();
 
@@ -250,9 +254,18 @@ void setLightUniforms(Shader& tess, Shader* waterShader) {//think about moving t
 void updatePerFrameUniforms(Shader& tess, Shader* waterShader)
 {
 	tess.use();
-	glm::mat4 view = camera.GetViewMatrix();
-	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1200.0f);
-	glm::mat4 model = glm::mat4(1.0f);
+	view = camera.GetViewMatrix();
+	projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1200.0f);
+	model = glm::mat4(1.0f);
+	if (camera.Position.y < 89)
+	{
+		tess.setFloat("DENS", 0.03f);
+	}
+	else if (camera.Position.y >= 89)
+	{
+		tess.setFloat("DENS", 0.005f);
+	}
+
 	tess.setMat4("projection", projection);
 	tess.setMat4("view", view);
 	tess.setMat4("model", model);
@@ -264,7 +277,7 @@ void updatePerFrameUniforms(Shader& tess, Shader* waterShader)
 	waterShader->setMat4("view", view);
 	waterShader->setMat4("model", model);
 	waterShader->setVec3("viewPos", camera.Position);
-	waterShader->setBool("flatShadingOn", NormalMap);
+	waterShader->setInt("Map", NormalMap);
 }
 
 void setWaterFBOs()

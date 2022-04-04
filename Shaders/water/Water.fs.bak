@@ -28,7 +28,7 @@ void main()
 {
     vec3 viewDir = normalize(viewPos - posGS);
 
-    vec2 scaleUV = vec2(TexCoordsGS) * 15;
+    vec2 scaleUV = vec2(TexCoordsGS) * 30;
     vec2 differential = (texture(DuDvMap, vec2(scaleUV.x + (time * 0.02), scaleUV.y)).rg * 2.0 - 1.0) * waveStrength;
     vec2 reflectTex = vec2((gl_FragCoord.x) / screenW, (-gl_FragCoord.y) / screenH);
     vec2 refractTex = vec2((gl_FragCoord.x) / screenW, (gl_FragCoord.y) / screenH);
