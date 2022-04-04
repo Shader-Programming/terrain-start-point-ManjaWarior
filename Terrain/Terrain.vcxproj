@@ -129,6 +129,7 @@
     <ClInclude Include="include\stb_image.h" />
     <ClInclude Include="include\Terrain.h" />
     <ClInclude Include="include\TextureManager.h" />
+    <ClInclude Include="include\water.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Camera.cpp" />
@@ -141,6 +142,7 @@
     <ClCompile Include="src\stb_image.cpp" />
     <ClCompile Include="src\Terrain.cpp" />
     <ClCompile Include="src\TextureManager.cpp" />
+    <ClCompile Include="src\water.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assimp-vc140-mt.dll" />

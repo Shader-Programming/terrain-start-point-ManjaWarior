@@ -1,0 +1,48 @@
+#version 450 core
+layout (vertices = 3) out;
+
+in vec3 posVS[] ;
+in vec2 texCoordsVS[];
+
+out vec3 posTC[] ;
+out vec2 texCoordsTC[];
+
+uniform vec3 viewPos;
+
+int getTessLevel(float eyeVertex1, float eyeVertex2);//caculates the tess level
+
+void main()
+{
+    int tessLevel = 1;
+	
+	float eyeToVertexDist0 = distance(viewPos, posVS[0]);
+    float eyeToVertexDist1 = distance(viewPos, posVS[1]);
+    float eyeToVertexDist2 = distance(viewPos, posVS[2]);
+	
+	posTC[gl_InvocationID]  = posVS[gl_InvocationID] ;
+    texCoordsTC[gl_InvocationID] = texCoordsVS[gl_InvocationID] ;
+	
+   if (gl_InvocationID==0)
+   {  
+
+          // Calculate the tessellation levels
+          gl_TessLevelOuter[0] = getTessLevel(eyeToVertexDist1, eyeToVertexDist2); 
+          gl_TessLevelOuter[1] = getTessLevel(eyeToVertexDist2, eyeToVertexDist0) ; 
+          gl_TessLevelOuter[2] = getTessLevel(eyeToVertexDist0, eyeToVertexDist1) ;//each of the edges calculated with each other
+          gl_TessLevelInner[0] = (getTessLevel(eyeToVertexDist1, eyeToVertexDist2) + getTessLevel(eyeToVertexDist2, eyeToVertexDist0) + getTessLevel(eyeToVertexDist0, eyeToVertexDist1)) / 3;
+
+   }
+}
+
+int getTessLevel(float eyeVertex1, float eyeVertex2)
+{
+    int tessLevel = 0;
+    float distance = (eyeVertex1 + eyeVertex2) / 2; //adds the 2 edges and divides by 2
+
+    float c = 20.0;//constant value, start value
+    float e = 2.718;//euler number
+    float k = 0.0065;//scaling factor for the distance
+    tessLevel = int(c*pow(e,-distance*k));
+    tessLevel = clamp(tessLevel, 1, 100);
+    return tessLevel;//tweak at end
+}

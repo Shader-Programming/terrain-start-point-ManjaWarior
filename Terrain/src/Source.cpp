@@ -8,6 +8,7 @@
 
 #include <Model.h>
 #include "Terrain.h"
+#include "water.h"
 #include "TextureManager.h"
 
 #include<string>
@@ -32,8 +33,16 @@ void processInput(GLFWwindow* window);
 //unsigned int loadTexture2(char const * path);
 void setVAO(vector <float> vertices);
 
+void setWaterFBOs();
+void refractionPass(Terrain* terrain, Shader shader);
+void reflectionPass(Terrain* terrain, Shader shader);
+
+glm::vec4 waterPlane = glm::vec4(0.f, -1.f, 0.f, 90.f);
+
+unsigned int refractionFBO, reflectionFBO, refractionTex, reflectionTex;
+
 void setLightUniforms(Shader& shader, TextureManager* texMan);
-void updatePerFrameUniforms(Shader& shader);
+void updatePerFrameUniforms(Shader& shader, Shader* waterShader);
 
 // camera
 Camera camera(glm::vec3(260, 100, 300));
@@ -73,22 +82,94 @@ int main()
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
+	setWaterFBOs();
+
 	TextureManager* texMan = new TextureManager();
 
 	// simple vertex and fragment shader - add your own tess and geo shader
 	Shader shader("..\\shaders\\tessVert.vs", "..\\shaders\\phongDirFrag.fs", "..\\shaders\\FlatShadingGeo.gs", "..\\shaders\\tessControlShader.tcs", "..\\shaders\\tessEvaluationShader.tes");
-
-	//Terrain Constructor ; number of grids in width, number of grids in height, gridSize
-	Terrain* terrain = new Terrain(50, 50, 10);
-
-	shader.use();
-	setLightUniforms(shader, texMan);
+	Shader* compute = new Shader("..\\shaders\\ComputeShader.cs");
+	Shader* normalsCompute = new Shader("..\\shaders\\normalsCompute.cs");
 
 	unsigned int normalMap = texMan->loadTexture("..\\resources\\newPath\\Ground_Dirt_009_Normal.jpg");
 	unsigned int output_img = texMan->createTexture(512, 512);
 	unsigned int normal_img = texMan->createTexture(512, 512);
 
-	terrain->assignTextures(output_img, normal_img, normalMap);
+	unsigned int waterNormalMap = texMan->loadTexture("..\\resources\\water\\waterNormals.png");
+	unsigned int waterDUDV = texMan->loadTexture("..\\resources\\water\\waterDUDV.png");
+
+	compute->use();
+	compute->setFloat("scale", 100.0f);
+	compute->setInt("octaves", 10);
+	compute->setFloat("terrainHash", glfwGetTime());
+	glBindImageTexture(0, output_img, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+	glDispatchCompute((GLuint)32, (GLuint)16, 1);
+	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+	//compute shader perlin noise
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, output_img);
+
+	normalsCompute->use();
+	normalsCompute->setFloat("scale", 1.0f);
+	normalsCompute->setInt("perlin_img", 0);
+	glBindImageTexture(0, normal_img, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+	glDispatchCompute((GLuint)32, (GLuint)16, 1);
+	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, normal_img);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, normalMap);
+
+	shader.use();
+	shader.setInt("perlin_img", 0);
+	shader.setInt("normals_img", 1);
+	shader.setInt("normalMap", 2);
+
+	shader.setInt("scale", 1); //scale of perlin noise generation 
+	shader.setInt("octaves", 10);//number of octaves in perlin noise
+
+	//fog stuff
+	shader.setFloat("DENS", 0.005f);//density of the fog
+	shader.setFloat("G", 1.2f);//gradient of the fog
+
+	const float RED = 0.5f;
+	const float GREEN = 0.5f;
+	const float BLUE = 0.5f;
+	glClearColor(RED, GREEN, BLUE, 1.0); //default sky colour
+	shader.setVec3("sky", glm::vec3(RED, GREEN, BLUE));//grey colour for fog
+
+	//Terrain Constructor ; number of grids in width, number of grids in height, gridSize
+	Terrain* terrain = new Terrain(50, 50, 10);
+
+	
+
+
+
+	//terrain->assignTextures(output_img, normal_img, normalMap);
+
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, waterNormalMap);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, waterDUDV);
+
+
+
+
+
+
+	Water water(90, 50, 10);
+	water.waterShader->use();
+	water.waterShader->setFloat("screenW", SCR_WIDTH);
+	water.waterShader->setFloat("screenH", SCR_HEIGHT);
+	water.waterShader->setVec3("lightDir", dirLightPos);
+	water.waterShader->setInt("normalMap", 3);
+	water.waterShader->setInt("DuDvMap", 4);
+
+	shader.use();
+	setLightUniforms(shader, texMan);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -99,9 +180,23 @@ int main()
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		updatePerFrameUniforms(shader);
+		updatePerFrameUniforms(shader, water.waterShader);
 
+		shader.use();
 		terrain->drawTerrain();
+
+		std::cout << camera.Position.y << std::endl;
+
+		glEnable(GL_CLIP_DISTANCE0);
+		reflectionPass(terrain, shader);
+		refractionPass(terrain, shader);
+		glDisable(GL_CLIP_DISTANCE0);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		water.waterShader->use();
+		water.waterShader->setFloat("time", glfwGetTime() * 0.5);
+		water.renderWater(reflectionTex, refractionTex);
+
 
 		//texMan->drawTexture(normal_img);
 
@@ -179,12 +274,9 @@ void setLightUniforms(Shader& tess, TextureManager* texMan) {//think about movin
 
 	tess.use();
 
-	tess.setInt("perlin_img", 0);
-	tess.setInt("normals_img", 1);
-	tess.setInt("normalMap", 2);
-
-	glEnable(GL_CLIP_DISTANCE0);
-	glm::vec4 plane = glm::vec4(0, 1, 0, -3);
+	//tess.setInt("perlin_img", 0);
+	//tess.setInt("normals_img", 1);
+	//tess.setInt("normalMap", 2);
 
 	//light properties
 	tess.setVec3("dirLight.direction", dirLightPos);
@@ -201,26 +293,64 @@ void setLightUniforms(Shader& tess, TextureManager* texMan) {//think about movin
 	tess.setMat4("projection", projection);
 	tess.setMat4("model", model);
 
-	tess.setInt("scale", 1); //scale of perlin noise generation 
-	tess.setInt("octaves", 10);//number of octaves in perlin noise
-
-	//fog stuff
-	tess.setFloat("DENS", 0.005f);//density of the fog
-	tess.setFloat("G", 1.2f);//gradient of the fog
-
-	const float RED = 0.5f;
-	const float GREEN = 0.5f;
-	const float BLUE = 0.5f;
-	glClearColor(RED, GREEN, BLUE, 1.0); //default sky colour
-	tess.setVec3("sky", glm::vec3(RED, GREEN, BLUE));//grey colour for fog
 
 }
 
-void updatePerFrameUniforms(Shader& tess)
+void updatePerFrameUniforms(Shader& tess, Shader* waterShader)
 {
 	tess.use();
 	glm::mat4 view = camera.GetViewMatrix();
+	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1200.0f);
+	glm::mat4 model = glm::mat4(1.0f);
+	tess.setMat4("projection", projection);
 	tess.setMat4("view", view);
+	tess.setMat4("model", model);
 	tess.setVec3("viewPos", camera.Position);
 	tess.setInt("Map", NormalMap);
+
+	waterShader->use();
+	waterShader->setMat4("projection", projection);
+	waterShader->setMat4("view", view);
+	waterShader->setMat4("model", model);
+	waterShader->setVec3("viewPos", camera.Position);
+	waterShader->setBool("flatShadingOn", NormalMap);
+}
+
+void setWaterFBOs()
+{
+	glGenFramebuffers(1, &refractionFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, refractionFBO);
+	glGenTextures(1, &refractionTex);
+	glBindTexture(GL_TEXTURE_2D, refractionTex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, refractionTex, 0);
+
+	glGenFramebuffers(1, &reflectionFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, reflectionFBO);
+	glGenTextures(1, &reflectionTex);
+	glBindTexture(GL_TEXTURE_2D, reflectionTex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, reflectionTex, 0);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void reflectionPass(Terrain* terrain, Shader shader)
+{
+	shader.setVec4("plane", -waterPlane);
+	glBindFramebuffer(GL_FRAMEBUFFER, reflectionFBO);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	terrain->drawTerrain();
+}
+
+void refractionPass(Terrain* terrain, Shader shader)
+{
+	shader.setVec4("plane", waterPlane);
+	glBindFramebuffer(GL_FRAMEBUFFER, refractionFBO);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	terrain->drawTerrain();
 }

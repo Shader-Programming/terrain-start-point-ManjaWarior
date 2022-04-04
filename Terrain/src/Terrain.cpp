@@ -74,8 +74,7 @@ void Terrain::assignTextures(unsigned int output_img, unsigned int normal_img, u
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, normal_img);
 
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, normalMap);
+	
 }
 
 void Terrain::drawTerrain()
