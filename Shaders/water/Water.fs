@@ -56,7 +56,8 @@ vec3 highlights(vec3 norms, vec3 viewDir)
 {
 	//blinn phong
     vec3 halfwaydir = normalize(lightDir + viewDir);
-    float spec = pow(max(dot(norms, halfwaydir), 0.0), 1) * 0.25;
+    float spec = pow(max(dot(norms, halfwaydir), 0.0), 1) * 0.05;
+	// = clamp(spec, 0.01f, 1.0f);
     vec3 specular = spec * lightColour;
     return specular;
 }

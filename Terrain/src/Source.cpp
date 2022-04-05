@@ -248,6 +248,26 @@ void setLightUniforms(Shader& tess, Shader* waterShader) {//think about moving t
 	waterShader->setVec3("lightDir", dirLightPos);
 	waterShader->setInt("normalMap", 3);
 	waterShader->setInt("DuDvMap", 4);
+
+	waterShader->setFloat("waves[0].amp", 1.5f);
+	waterShader->setVec2("waves[0].waveDir", glm::vec2(1.0, 0.0));
+	waterShader->setFloat("waves[0].crestdist", 50.0f);
+	waterShader->setFloat("waves[0].speed", 0.5f);
+
+	waterShader->setFloat("waves[1].amp", 1.0f);
+	waterShader->setVec2("waves[1].waveDir", glm::vec2(0.0, 1.0));
+	waterShader->setFloat("waves[1].crestdist", 30.0f);
+	waterShader->setFloat("waves[1].speed", 0.75f);
+
+	waterShader->setFloat("waves[2].amp", 1.5f);
+	waterShader->setVec2("waves[2].waveDir", glm::vec2(0.5, 0.5));
+	waterShader->setFloat("waves[2].crestdist", 25.0f);
+	waterShader->setFloat("waves[2].speed", 1.0f);
+
+	waterShader->setFloat("waves[3].amp", 0.5f);
+	waterShader->setVec2("waves[3].waveDir", glm::vec2(1.0, 1.0));
+	waterShader->setFloat("waves[3].crestdist", 90.0f);
+	waterShader->setFloat("waves[3].speed", 1.0f);
 }
 
 void updatePerFrameUniforms(Shader& tess, Shader* waterShader)
