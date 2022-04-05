@@ -21,4 +21,5 @@ private:
     std::vector<float> vertices;
     void MakeVertex(int x, int y, std::vector<float>* vertices);
     unsigned int waterVBO, waterVAO;
+    glm::mat4 model = glm::mat4(1.0);
 };

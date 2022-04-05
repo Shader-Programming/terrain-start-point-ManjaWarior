@@ -19,7 +19,6 @@ void main()
     float eyeToVertexDist1 = distance(viewPos, posVS[1]);
     float eyeToVertexDist2 = distance(viewPos, posVS[2]);
 	
-	// pass through position and normal information
 	posTC[gl_InvocationID]  = posVS[gl_InvocationID] ;
     texCoordsTC[gl_InvocationID] = texCoordsVS[gl_InvocationID] ;
 	

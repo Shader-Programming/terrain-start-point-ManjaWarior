@@ -8,8 +8,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 
-
-#include "PerlinNoise.h"
 #include "Shader.h"
 #include "TextureManager.h"
 
@@ -35,7 +33,6 @@ private:
 	int stepSize;
 	void makeVertices(std::vector<float> *vertices);
 	void makeVertex(int x, int y, std::vector<float> *vertices);
-	PerlinNoise perlin;
 	std::vector<float> getVertices();
 
 	//own variables

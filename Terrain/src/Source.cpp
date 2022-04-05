@@ -33,16 +33,16 @@ void processInput(GLFWwindow* window);
 //unsigned int loadTexture2(char const * path);
 void setVAO(vector <float> vertices);
 
-void setWaterFBOs();
-void refractionPass(Terrain* terrain, Shader shader);
-void reflectionPass(Terrain* terrain, Shader shader);
+void createWaterFBOs();//create and bind frame buffers for reflection and refraction
+void refractionPass(Terrain* terrain, Shader shader);//draw the terrain for refraction on surface
+void reflectionPass(Terrain* terrain, Shader shader);//draw the terrain for reflection on surface
 
-glm::vec4 waterPlane = glm::vec4(0.f, -1.f, 0.f, 90.f);
+glm::vec4 waterPlane = glm::vec4(0.f, -1.f, 0.f, 90.f);//plane for plane clipping the water
 
-unsigned int refractionFBO, reflectionFBO, refractionTex, reflectionTex;
+unsigned int refractionFBO, reflectionFBO, refractionTexture, reflectionTexture;
 
-void setLightUniforms(Shader& shader, Shader* waterShader);
-void updatePerFrameUniforms(Shader& shader, Shader* waterShader);
+void setLightUniforms(Shader& shader, Shader* waterShader);//sets the initial uniforms
+void updatePerFrameUniforms(Shader& shader, Shader* waterShader);//updates the uniforms every frame
 
 // camera
 Camera camera(glm::vec3(260, 125, 300));
@@ -86,7 +86,7 @@ int main()
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
-	setWaterFBOs();
+	createWaterFBOs();
 
 	TextureManager* texMan = new TextureManager();
 
@@ -131,8 +131,7 @@ int main()
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		water.waterShader->use();
-		water.waterShader->setFloat("time", glfwGetTime() * 0.5);
-		water.renderWater(reflectionTex, refractionTex);
+		water.renderWater(reflectionTexture, refractionTexture);
 
 
 		//texMan->drawTexture(normal_img);
@@ -244,8 +243,8 @@ void setLightUniforms(Shader& tess, Shader* waterShader) {//think about moving t
 	tess.setVec3("sky", glm::vec3(RED, GREEN, BLUE));//grey colour for fog
 
 	waterShader->use();
-	waterShader->setFloat("screenW", SCR_WIDTH);
-	waterShader->setFloat("screenH", SCR_HEIGHT);
+	waterShader->setFloat("screenWidth", SCR_WIDTH);
+	waterShader->setFloat("screenHeight", SCR_HEIGHT);
 	waterShader->setVec3("lightDir", dirLightPos);
 	waterShader->setInt("normalMap", 3);
 	waterShader->setInt("DuDvMap", 4);
@@ -278,27 +277,28 @@ void updatePerFrameUniforms(Shader& tess, Shader* waterShader)
 	waterShader->setMat4("model", model);
 	waterShader->setVec3("viewPos", camera.Position);
 	waterShader->setInt("Map", NormalMap);
+	waterShader->setFloat("time", glfwGetTime() * 0.3);
 }
 
-void setWaterFBOs()
+void createWaterFBOs()
 {
 	glGenFramebuffers(1, &refractionFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, refractionFBO);
-	glGenTextures(1, &refractionTex);
-	glBindTexture(GL_TEXTURE_2D, refractionTex);
+	glGenTextures(1, &refractionTexture);
+	glBindTexture(GL_TEXTURE_2D, refractionTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, refractionTex, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, refractionTexture, 0);
 
 	glGenFramebuffers(1, &reflectionFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, reflectionFBO);
-	glGenTextures(1, &reflectionTex);
-	glBindTexture(GL_TEXTURE_2D, reflectionTex);
+	glGenTextures(1, &reflectionTexture);
+	glBindTexture(GL_TEXTURE_2D, reflectionTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, reflectionTex, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, reflectionTexture, 0);
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

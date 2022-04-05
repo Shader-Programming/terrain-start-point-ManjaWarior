@@ -56,6 +56,7 @@ void Terrain::assignTextures(unsigned int output_img, unsigned int normal_img, u
 	compute->setFloat("scale", 100.0f);
 	compute->setInt("octaves", 10);
 	compute->setFloat("terrainHash", glfwGetTime());
+	std::cout << rand() % 500 + 1 << std::endl;
 	glBindImageTexture(0, output_img, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 	glDispatchCompute((GLuint)32, (GLuint)16, 1);
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
@@ -131,9 +132,6 @@ void Terrain::makeVertex(int x, int y, std::vector<float> *vertices) {
 
 	//x y z position
 	vertices->push_back((float)x); //xPos
-	/*glm::vec3 pos = glm::vec3(x, y, 0.01);
-	double p = cycleOctaves(pos, 10);
-	vertices->push_back(p); //xPos*/
 	vertices->push_back(0.0f); //yPos - always 0 for now. Going to calculate this on GPU - can change to calclaute it here.
 	vertices->push_back((float)y); //zPos
 

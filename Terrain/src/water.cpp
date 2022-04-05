@@ -64,7 +64,7 @@ void Water::renderWater(unsigned int& reflectionTex, unsigned int& refractionTex
     glBindTexture(GL_TEXTURE_2D, refractionTex);
     waterShader->setInt("refraction", 6);
 
-    glm::mat4 model = glm::mat4(1.0);
+    model = glm::mat4(1.0);
     waterShader->setMat4("model", model);
     glBindVertexArray(waterVAO);
     glBindBuffer(GL_ARRAY_BUFFER, waterVBO);
