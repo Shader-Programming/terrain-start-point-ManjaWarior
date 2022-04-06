@@ -262,12 +262,12 @@ void setLightUniforms(Shader& tess, Shader* waterShader, SkyBox skyBox, Shader s
 	waterShader->setFloat("waves[1].speed", 0.75f);
 
 	waterShader->setFloat("waves[2].amp", 1.5f);
-	waterShader->setVec2("waves[2].waveDir", glm::vec2(0.5, 0.0));
+	waterShader->setVec2("waves[2].waveDir", glm::vec2(0.0, 1.0));
 	waterShader->setFloat("waves[2].crestdist", 25.0f);
 	waterShader->setFloat("waves[2].speed", 1.0f);
 
 	waterShader->setFloat("waves[3].amp", 0.5f);
-	waterShader->setVec2("waves[3].waveDir", glm::vec2(0.25, 0.0));
+	waterShader->setVec2("waves[3].waveDir", glm::vec2(0.0, 0.3));
 	waterShader->setFloat("waves[3].crestdist", 65.0f);
 	waterShader->setFloat("waves[3].speed", 1.0f);//sets the uniforms for each wave
 

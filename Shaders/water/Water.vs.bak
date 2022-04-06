@@ -42,7 +42,7 @@ void main()
     normVS = aNormals ;
 }
 
-vec3 CalcGerstnerWaves(vec3 V, float amp, vec2 wavedir, float crestdist, float speed){
+vec3 CalcGerstnerWaves(vec3 V, float amp, vec2 wavedir, float crestdist, float speed){//calculates the waves movement to modify position 
     speed*=time;
     float wavelength = (2*3.14152)/crestdist;
     float phasespd = sqrt(9.8)/wavelength; //phase speed

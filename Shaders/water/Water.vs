@@ -47,7 +47,7 @@ vec3 CalcGerstnerWaves(vec3 V, float amp, vec2 wavedir, float crestdist, float s
     float wavelength = (2*3.14152)/crestdist;
     float phasespd = sqrt(9.8)/wavelength; //phase speed
 
-    float f = V.y+(dot(V.xy,wavedir)-phasespd*speed)*wavelength;
+    float f = V.y+(dot(V.xz,wavedir)-phasespd*speed)*wavelength;
     V.x += wavedir.x*(amp*cos(f));
     V.y += amp*sin(f);
     V.z += wavedir.y*(amp*cos(f));
