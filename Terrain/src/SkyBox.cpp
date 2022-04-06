@@ -15,7 +15,7 @@ void SkyBox::renderSkyBox(Shader& shader)
 	shader.use();
 	glDepthFunc(GL_LEQUAL);
 	glBindVertexArray(skyBoxVAO);
-	glActiveTexture(GL_TEXTURE0);
+	glActiveTexture(GL_TEXTURE7);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, skyBoxTexObj);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glDepthFunc(GL_LESS);
@@ -23,12 +23,14 @@ void SkyBox::renderSkyBox(Shader& shader)
 
 void SkyBox::loadCubeMapTextures()
 {
-	faces.push_back("..\\Resources\\SkyBox\\graycloud_rt.jpg");//right
-	faces.push_back("..\\Resources\\SkyBox\\graycloud_lf.jpg");//left
-	faces.push_back("..\\Resources\\SkyBox\\graycloud_up.jpg");//top
-	faces.push_back("..\\Resources\\SkyBox\\graycloud_dn.jpg");//bottom
-	faces.push_back("..\\Resources\\SkyBox\\graycloud_ft.jpg");//front
-	faces.push_back("..\\Resources\\SkyBox\\graycloud_bk.jpg");//back
+	faces.push_back("..\\Resources\\Skybox\\xpos.png");//right
+	faces.push_back("..\\Resources\\Skybox\\xneg.png");//left
+	faces.push_back("..\\Resources\\Skybox\\ypos.png");//top
+	faces.push_back("..\\Resources\\Skybox\\yneg.png");//bottom
+	faces.push_back("..\\Resources\\Skybox\\zpos.png");//front
+	faces.push_back("..\\Resources\\Skybox\\zneg.png");//back
+
+
 
 	skyBoxTexObj = loadCubeMap(faces);
 }

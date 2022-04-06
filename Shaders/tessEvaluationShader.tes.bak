@@ -6,9 +6,7 @@ layout(triangles, equal_spacing, ccw) in;
 // forward declare functions to perfrom interpolation with the barycentric coordinates from the Primitive Generator
 vec2 interpolate2D(vec2 v0, vec2 v1, vec2 v2) ;
 vec3 interpolate3D(vec3 v0, vec3 v1, vec3 v2) ;
-float noise(vec3 position, int octaves);
-float snoise(vec3 x);
-float hash(float n);
+
 
 
 // unifrom matrices to perform transformations
@@ -40,11 +38,34 @@ out float visibilityES;
 
 void main()
 {
+	float u = gl_TessCoord.x;
+    float v = gl_TessCoord.y;
+    float w = gl_TessCoord.z;
+
+    float uPow3 = pow(u, 3);
+    float vPow3 = pow(v, 3);
+    float wPow3 = pow(w, 3);
+    float uPow2 = pow(u, 2);
+    float vPow2 = pow(v, 2);
+    float wPow2 = pow(w, 2);
+
+
+    posES = oPatch.WorldPos_B300 * wPow3 +
+                oPatch.WorldPos_B030 * uPow3 +
+                oPatch.WorldPos_B003 * vPow3 +
+                oPatch.WorldPos_B210 * 3.0 * wPow2 * u +
+                oPatch.WorldPos_B120 * 3.0 * w * uPow2 +
+                oPatch.WorldPos_B201 * 3.0 * wPow2 * v +
+                oPatch.WorldPos_B021 * 3.0 * uPow2 * v +
+                oPatch.WorldPos_B102 * 3.0 * w * vPow2 +
+                oPatch.WorldPos_B012 * 3.0 * u * vPow2 +
+                oPatch.WorldPos_B111 * 6.0 * w * u * v;
+				
     // interpolate the normal and xyz position using the linear interpolation function
     // use 3D because they are in three dimensions; 2D also included for uv texture coordinates
 
     texCoordsES = interpolate2D(texCoordsTC[0], texCoordsTC[1], texCoordsTC[2]) ;
-    posES = interpolate3D(posTC[0], posTC[1], posTC[2]) ;
+    //posES = interpolate3D(posTC[0], posTC[1], posTC[2]) ;
 	
 	vec4 map = texture(normals_img, texCoordsES);
 	
@@ -71,37 +92,4 @@ vec2 interpolate2D(vec2 v0, vec2 v1, vec2 v2)
 vec3 interpolate3D(vec3 v0, vec3 v1, vec3 v2)
 {
    	return vec3(gl_TessCoord.x) * v0 + vec3(gl_TessCoord.y) * v1 + vec3(gl_TessCoord.z) * v2;
-}
-
-float hash(float n) {
-    return fract(sin(n) * 753.5453123);
-}
-
-float snoise(vec3 x)
-{
-	vec3 p = floor(x);
-	vec3 f = fract(x);
-	f = f * f * (3.0f - (2.0f * f));
-
-	float n = p.x + p.y * 157.0f + 113.0f * p.z;
-	return mix(mix(mix(hash(n + 0.0f), hash(n + 1.0f), f.x),
-		mix(hash(n + 157.0f), hash(n + 158.0f), f.x), f.y),
-		mix(mix(hash(n + 113.0f), hash(n + 114.0f), f.x),
-			mix(hash(n + 270.0f), hash(n + 271.0f), f.x), f.y), f.z);
-}
-
-float noise(vec3 position, int octaves)
-{
-	float total = 0.0f;
-	float frequency = 0.005f;
-	float maxAmplitude = 0.0f;
-	float amplitude = 50.0f;
-	for(int i = 0; i < octaves; i++)
-	{
-		total += snoise(position * frequency) * amplitude;
-		frequency *= 2.0f;
-		amplitude /= 2.0f;
-		maxAmplitude += amplitude;
-	}
-	return (total / maxAmplitude) * scale;
 }

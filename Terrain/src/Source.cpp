@@ -10,6 +10,7 @@
 #include "Terrain.h"
 #include "water.h"
 #include "TextureManager.h"
+#include "SkyBox.h"
 
 #include<string>
 #include <numeric>
@@ -34,15 +35,15 @@ void processInput(GLFWwindow* window);
 void setVAO(vector <float> vertices);
 
 void createWaterFBOs();//create and bind frame buffers for reflection and refraction
-void refractionPass(Terrain* terrain, Shader shader);//draw the terrain for refraction on surface
-void reflectionPass(Terrain* terrain, Shader shader);//draw the terrain for reflection on surface
+void refractionPass(Terrain* terrain, Shader shader, SkyBox skyBox, Shader skyBoxShader);//draw the terrain for refraction on surface
+void reflectionPass(Terrain* terrain, Shader shader, SkyBox skyBox, Shader skyBoxShader);//draw the terrain for reflection on surface
 
 glm::vec4 waterPlane = glm::vec4(0.f, -1.f, 0.f, 90.f);//plane for plane clipping the water
 
 unsigned int refractionFBO, reflectionFBO, refractionTexture, reflectionTexture;
 
-void setLightUniforms(Shader& shader, Shader* waterShader);//sets the initial uniforms
-void updatePerFrameUniforms(Shader& shader, Shader* waterShader);//updates the uniforms every frame
+void setLightUniforms(Shader& shader, Shader* waterShader, SkyBox skyBox, Shader skyBoxShader);//sets the initial uniforms
+void updatePerFrameUniforms(Shader& shader, Shader* waterShader, Shader skyBoxShader);//updates the uniforms every frame
 
 // camera
 Camera camera(glm::vec3(260, 125, 300));
@@ -92,6 +93,7 @@ int main()
 
 	// simple vertex and fragment shader - add your own tess and geo shader
 	Shader shader("..\\shaders\\tessVert.vs", "..\\shaders\\phongDirFrag.fs", "..\\shaders\\FlatShadingGeo.gs", "..\\shaders\\tessControlShader.tcs", "..\\shaders\\tessEvaluationShader.tes");
+	Shader skyBoxShader("..\\shaders\\Skybox\\SB.vs", "..\\shaders\\Skybox\\SB.fs");
 
 	unsigned int normalMap = texMan->loadTexture("..\\resources\\newPath\\Ground_Dirt_009_Normal.jpg");
 	unsigned int output_img = texMan->createTexture(512, 512);
@@ -107,8 +109,11 @@ int main()
 	Water water(90, 50, 10);
 	water.assignTextures(waterNormalMap, waterDUDV);
 
+	SkyBox skyBox;
+	skyBox.createSkyBox();
+
 	shader.use();
-	setLightUniforms(shader, water.waterShader);
+	setLightUniforms(shader, water.waterShader, skyBox, skyBoxShader);
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -119,14 +124,15 @@ int main()
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		updatePerFrameUniforms(shader, water.waterShader);
+		updatePerFrameUniforms(shader, water.waterShader, skyBoxShader);
 
 		shader.use();
 		terrain->drawTerrain();
+		skyBox.renderSkyBox(skyBoxShader);
 
 		glEnable(GL_CLIP_DISTANCE0);
-		reflectionPass(terrain, shader);
-		refractionPass(terrain, shader);
+		reflectionPass(terrain, shader, skyBox, skyBoxShader);
+		refractionPass(terrain, shader, skyBox, skyBoxShader);
 		glDisable(GL_CLIP_DISTANCE0);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -193,10 +199,6 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
-
-
-
-
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 // ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
@@ -204,7 +206,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 	camera.ProcessMouseScroll(yoffset);
 }
 
-void setLightUniforms(Shader& tess, Shader* waterShader) {//think about moving this stuff to terrain class, issue is currently aterrain even with all GLM header files cannot use perspective 
+void setLightUniforms(Shader& tess, Shader* waterShader, SkyBox skyBox, Shader skyBoxShader) {//think about moving this stuff to terrain class, issue is currently aterrain even with all GLM header files cannot use perspective 
 	projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1200.0f);
 	model = glm::mat4(1.0f);
 
@@ -236,9 +238,9 @@ void setLightUniforms(Shader& tess, Shader* waterShader) {//think about moving t
 	tess.setFloat("DENS", 0.005f);//density of the fog
 	tess.setFloat("G", 1.2f);//gradient of the fog
 
-	const float RED = 0.5f;
-	const float GREEN = 0.5f;
-	const float BLUE = 0.5f;
+	const float RED = 0.4f;
+	const float GREEN = 0.6f;
+	const float BLUE = 0.4f;
 	glClearColor(RED, GREEN, BLUE, 1.0); //default sky colour
 	tess.setVec3("sky", glm::vec3(RED, GREEN, BLUE));//grey colour for fog
 
@@ -255,22 +257,27 @@ void setLightUniforms(Shader& tess, Shader* waterShader) {//think about moving t
 	waterShader->setFloat("waves[0].speed", 0.5f);
 
 	waterShader->setFloat("waves[1].amp", 1.0f);
-	waterShader->setVec2("waves[1].waveDir", glm::vec2(0.0, 1.0));
+	waterShader->setVec2("waves[1].waveDir", glm::vec2(0.75, 0.0));
 	waterShader->setFloat("waves[1].crestdist", 30.0f);
 	waterShader->setFloat("waves[1].speed", 0.75f);
 
 	waterShader->setFloat("waves[2].amp", 1.5f);
-	waterShader->setVec2("waves[2].waveDir", glm::vec2(0.5, 0.5));
+	waterShader->setVec2("waves[2].waveDir", glm::vec2(0.5, 0.0));
 	waterShader->setFloat("waves[2].crestdist", 25.0f);
 	waterShader->setFloat("waves[2].speed", 1.0f);
 
 	waterShader->setFloat("waves[3].amp", 0.5f);
-	waterShader->setVec2("waves[3].waveDir", glm::vec2(1.0, 1.0));
-	waterShader->setFloat("waves[3].crestdist", 90.0f);
+	waterShader->setVec2("waves[3].waveDir", glm::vec2(0.25, 0.0));
+	waterShader->setFloat("waves[3].crestdist", 65.0f);
 	waterShader->setFloat("waves[3].speed", 1.0f);
+
+	skyBoxShader.use();
+	skyBoxShader.setMat4("view", view);
+	skyBoxShader.setMat4("projection", projection);
+	skyBoxShader.setInt("skybox", 7);
 }
 
-void updatePerFrameUniforms(Shader& tess, Shader* waterShader)
+void updatePerFrameUniforms(Shader& tess, Shader* waterShader, Shader skyBoxShader)
 {
 	tess.use();
 	view = camera.GetViewMatrix();
@@ -282,7 +289,7 @@ void updatePerFrameUniforms(Shader& tess, Shader* waterShader)
 	}
 	else if (camera.Position.y >= 89)
 	{
-		tess.setFloat("DENS", 0.005f);
+		tess.setFloat("DENS", 0.0025f);
 	}
 
 	tess.setMat4("projection", projection);
@@ -298,6 +305,10 @@ void updatePerFrameUniforms(Shader& tess, Shader* waterShader)
 	waterShader->setVec3("viewPos", camera.Position);
 	waterShader->setInt("Map", NormalMap);
 	waterShader->setFloat("time", glfwGetTime() * 0.3);
+	 
+	skyBoxShader.use();
+	skyBoxShader.setMat4("view", glm::mat4(glm::mat3(camera.GetViewMatrix())));
+	skyBoxShader.setMat4("projection", projection);
 }
 
 void createWaterFBOs()
@@ -323,18 +334,23 @@ void createWaterFBOs()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void reflectionPass(Terrain* terrain, Shader shader)
+void reflectionPass(Terrain* terrain, Shader shader, SkyBox skyBox, Shader skyBoxShader)
 {
 	shader.setVec4("plane", -waterPlane);
 	glBindFramebuffer(GL_FRAMEBUFFER, reflectionFBO);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	skyBox.renderSkyBox(skyBoxShader);
+	shader.use();
 	terrain->drawTerrain();
+	
 }
 
-void refractionPass(Terrain* terrain, Shader shader)
+void refractionPass(Terrain* terrain, Shader shader, SkyBox skyBox, Shader skyBoxShader)
 {
 	shader.setVec4("plane", waterPlane);
 	glBindFramebuffer(GL_FRAMEBUFFER, refractionFBO);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	skyBox.renderSkyBox(skyBoxShader);
+	shader.use();
 	terrain->drawTerrain();
 }
