@@ -27,7 +27,7 @@ void main()
 {
     vec3 viewDir = normalize(viewPos - posGS);
 
-    vec2 UVscale = vec2(TexCoordsGS) * 15;
+    vec2 UVscale = vec2(TexCoordsGS) * 15;//scales the DuDv map
     vec2 differential = (texture(DuDvMap, vec2(UVscale.x + (time * 0.02), UVscale.y)).rg * 2.0 - 1.0) * waveStrength;
     vec2 reflectTexture = vec2((gl_FragCoord.x) / screenWidth, (-gl_FragCoord.y) / screenHeight);
     vec2 refractTextrue = vec2((gl_FragCoord.x) / screenWidth, (gl_FragCoord.y) / screenHeight);
@@ -35,11 +35,11 @@ void main()
 	vec3 normals = vec3(1.0);	
 	vec3 waterNormals = texture(normalMap, differential).xyz;
 	
-	if(Map == 0) 
+	if(Map == 0) //use normal map
     {
         normals = normalize(vec3(waterNormals.r * 2.0 - 1.0, waterNormals.b, waterNormals.g * 2.0 - 1.0));
 	}
-    else 
+    else //use flat shading
     {
         normals = flatNormalsGS;
     }

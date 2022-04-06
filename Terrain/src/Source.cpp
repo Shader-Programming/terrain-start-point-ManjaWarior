@@ -92,7 +92,7 @@ int main()
 	TextureManager* texMan = new TextureManager();
 
 	// simple vertex and fragment shader - add your own tess and geo shader
-	Shader shader("..\\shaders\\tessVert.vs", "..\\shaders\\phongDirFrag.fs", "..\\shaders\\FlatShadingGeo.gs", "..\\shaders\\tessControlShader.tcs", "..\\shaders\\tessEvaluationShader.tes");
+	Shader shader("..\\shaders\\tessVert.vs", "..\\shaders\\phongDirFrag.fs", "..\\shaders\\FlatShadingGeo.gs", "..\\shaders\\tessControlShader.tcs", "..\\shaders\\tessEvaluationShader.tes");//terrain shader
 	Shader skyBoxShader("..\\shaders\\Skybox\\SB.vs", "..\\shaders\\Skybox\\SB.fs");
 
 	unsigned int normalMap = texMan->loadTexture("..\\resources\\newPath\\Ground_Dirt_009_Normal.jpg");
@@ -242,7 +242,7 @@ void setLightUniforms(Shader& tess, Shader* waterShader, SkyBox skyBox, Shader s
 	const float GREEN = 0.6f;
 	const float BLUE = 0.4f;
 	glClearColor(RED, GREEN, BLUE, 1.0); //default sky colour
-	tess.setVec3("sky", glm::vec3(RED, GREEN, BLUE));//grey colour for fog
+	tess.setVec3("sky", glm::vec3(RED, GREEN, BLUE));//greenish colour for fog
 
 	waterShader->use();
 	waterShader->setFloat("screenWidth", SCR_WIDTH);
@@ -269,12 +269,12 @@ void setLightUniforms(Shader& tess, Shader* waterShader, SkyBox skyBox, Shader s
 	waterShader->setFloat("waves[3].amp", 0.5f);
 	waterShader->setVec2("waves[3].waveDir", glm::vec2(0.25, 0.0));
 	waterShader->setFloat("waves[3].crestdist", 65.0f);
-	waterShader->setFloat("waves[3].speed", 1.0f);
+	waterShader->setFloat("waves[3].speed", 1.0f);//sets the uniforms for each wave
 
 	skyBoxShader.use();
 	skyBoxShader.setMat4("view", view);
 	skyBoxShader.setMat4("projection", projection);
-	skyBoxShader.setInt("skybox", 7);
+	skyBoxShader.setInt("skybox", 7);//skybox uniforms
 }
 
 void updatePerFrameUniforms(Shader& tess, Shader* waterShader, Shader skyBoxShader)
@@ -283,11 +283,11 @@ void updatePerFrameUniforms(Shader& tess, Shader* waterShader, Shader skyBoxShad
 	view = camera.GetViewMatrix();
 	projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 1200.0f);
 	model = glm::mat4(1.0f);
-	if (camera.Position.y < 89)
+	if (camera.Position.y < 89)//if below water
 	{
 		tess.setFloat("DENS", 0.03f);
 	}
-	else if (camera.Position.y >= 89)
+	else if (camera.Position.y >= 89)//if above water
 	{
 		tess.setFloat("DENS", 0.0025f);
 	}
@@ -320,7 +320,7 @@ void createWaterFBOs()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, refractionTexture, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, refractionTexture, 0);//creates refraction framebuffer
 
 	glGenFramebuffers(1, &reflectionFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, reflectionFBO);
@@ -329,7 +329,7 @@ void createWaterFBOs()
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, reflectionTexture, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, reflectionTexture, 0);//creates reflection framebuffer
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -341,7 +341,7 @@ void reflectionPass(Terrain* terrain, Shader shader, SkyBox skyBox, Shader skyBo
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	skyBox.renderSkyBox(skyBoxShader);
 	shader.use();
-	terrain->drawTerrain();
+	terrain->drawTerrain();//both terrain and skybox need to be drawn for reflection on water surface
 	
 }
 
@@ -350,7 +350,6 @@ void refractionPass(Terrain* terrain, Shader shader, SkyBox skyBox, Shader skyBo
 	shader.setVec4("plane", waterPlane);
 	glBindFramebuffer(GL_FRAMEBUFFER, refractionFBO);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	skyBox.renderSkyBox(skyBoxShader);
 	shader.use();
-	terrain->drawTerrain();
+	terrain->drawTerrain();//will refract the appearance of terrain underwater
 }

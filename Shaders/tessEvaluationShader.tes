@@ -19,7 +19,7 @@ struct OutputPatch
     vec3 WorldPos_B210;
     vec3 WorldPos_B120;
     vec3 WorldPos_B111;
-};
+};//needs to be here too so it can be input
 
 // unifrom matrices to perform transformations
 // previously this would have been done in vertex shader
@@ -34,13 +34,13 @@ uniform sampler2D normals_img;
 uniform int scale;
 uniform int octaves;
 
-uniform float DENS;
-uniform float G;
+uniform float DENS;//fog density
+uniform float G;//fog gradient
 
 // read in vector arrays from previous shader
 in vec3 posTC[] ;
 in vec2 texCoordsTC[] ;
-in patch OutputPatch oPatch;
+in patch OutputPatch oPatch;//Pn triangles
 
 // pass along the interpolated values
 out vec2 texCoordsES ;
@@ -72,7 +72,7 @@ void main()
                 oPatch.WorldPos_B021 * 3.0 * uPow2 * v +
                 oPatch.WorldPos_B102 * 3.0 * w * vPow2 +
                 oPatch.WorldPos_B012 * 3.0 * u * vPow2 +
-                oPatch.WorldPos_B111 * 6.0 * w * u * v;
+                oPatch.WorldPos_B111 * 6.0 * w * u * v;//modifies the position of vertex accoring to PN triagnles and tessellation level
 				
     // interpolate the normal and xyz position using the linear interpolation function
     // use 3D because they are in three dimensions; 2D also included for uv texture coordinates
@@ -82,8 +82,8 @@ void main()
 	
 	vec4 map = texture(normals_img, texCoordsES);
 	
-	normalsES = map.rgb;
-	posES.y = map.a;
+	normalsES = map.rgb;//normals from normalCompute
+	posES.y = map.a;//alpha from perlin image
 	
     // transform vertex to clip space
 	gl_Position = projection * view * model *vec4(posES, 1.0);

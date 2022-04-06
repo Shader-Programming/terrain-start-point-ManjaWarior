@@ -55,7 +55,7 @@ void Terrain::assignTextures(unsigned int output_img, unsigned int normal_img, u
 	compute->use();
 	compute->setFloat("scale", 100.0f);
 	compute->setInt("octaves", 10);
-	compute->setFloat("terrainHash", glfwGetTime());
+	compute->setFloat("terrainHash", glfwGetTime());//sets the uniforms for compute shader
 	glBindImageTexture(0, output_img, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 	glDispatchCompute((GLuint)32, (GLuint)16, 1);
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
@@ -66,7 +66,7 @@ void Terrain::assignTextures(unsigned int output_img, unsigned int normal_img, u
 
 	normalsCompute->use();
 	normalsCompute->setFloat("scale", 1.0f);
-	normalsCompute->setInt("perlin_img", 0);
+	normalsCompute->setInt("perlin_img", 0);//sets the uniforms for compute shader
 	glBindImageTexture(0, normal_img, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
 	glDispatchCompute((GLuint)32, (GLuint)16, 1);
 	glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);

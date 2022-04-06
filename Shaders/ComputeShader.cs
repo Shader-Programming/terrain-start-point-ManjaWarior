@@ -9,7 +9,7 @@ float hash(float n);
 
 uniform float scale;
 uniform int octaves;
-uniform float terrainHash;
+uniform float terrainHash;//randomises terrain generation
 
 void main()
 {
@@ -51,5 +51,5 @@ float noise(vec3 position, int octaves)
 		amplitude /= 2.0f;
 		maxAmplitude += amplitude;
 	}
-	return (total / maxAmplitude) * scale;
+	return (total / maxAmplitude) * scale;//scale up 100 times here so scale is not needed elsewhere and wil be consistent
 }

@@ -36,8 +36,8 @@ private:
 	std::vector<float> getVertices();
 
 	//own variables
-	Shader* compute = new Shader("..\\shaders\\ComputeShader.cs");
-	Shader* normalsCompute = new Shader("..\\shaders\\normalsCompute.cs");
+	Shader* compute = new Shader("..\\shaders\\ComputeShader.cs");//perlin noise shader
+	Shader* normalsCompute = new Shader("..\\shaders\\normalsCompute.cs");//normal map shader
 	TextureManager* texMan = new TextureManager();
 };
 #endif

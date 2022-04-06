@@ -9,8 +9,8 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 uniform vec3 viewPos;
-uniform float DENS;
-uniform float G;
+uniform float DENS;//fog density
+uniform float G;//fog gradient
 
 in vec3 posTC[] ;
 in vec2 texCoordsTC[];
@@ -31,7 +31,7 @@ void main()
 
    //fog stuff
 	float distanceFromCamera = distance(viewPos, posES);
-	visibilityES = exp(-pow((distanceFromCamera*DENS),G));
+	visibilityES = exp(-pow((distanceFromCamera*DENS),G));//calculates fog dependent on distance 
 	visibilityES = clamp(visibilityES, 0.0, 1.0);
 } 
 

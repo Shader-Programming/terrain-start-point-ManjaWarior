@@ -45,11 +45,11 @@ void main()
 
     if(height > 0.0 && height < 95.0)
     {
-        colour = vec3(mix(green, gray, smoothstep(95.6, 50.0, height)).rgb);
+        colour = vec3(mix(green, gray, smoothstep(95.6, 50.0, height)).rgb);//blends green and gray, lower is gray higher is green
     }
 	else if (height >= 95.0)
 	{
-		colour = vec3(mix(green, red, smoothstep(92.5, 110.0, height)).rgb);//smooth steps may need tuning
+		colour = vec3(mix(green, red, smoothstep(92.5, 110.0, height)).rgb);//red at top green on bottom, blends nicely 
 	}
     else
     {
@@ -61,9 +61,9 @@ void main()
 	//percentage multiplier for each axis
 	vec3 blendPercent = normalize(abs(normalsGS));
 	float b = (blendPercent.x + blendPercent.y + blendPercent.z);
-	blendPercent = blendPercent/vec3(b);
+	blendPercent = blendPercent/vec3(b);//blending for the pri-planer edges
 	
-	vec3 norm  = texture(normalMap, texCoordsGS * 10).xyz;
+	vec3 norm  = texture(normalMap, texCoordsGS * 10).xyz;//* 10 to scale the normal map
 	norm = normalize(gTBN*(norm*2.0 - 1.0)) ;//needed for diffuse lighting
 	
 	//tri planer normal mapping
@@ -71,7 +71,7 @@ void main()
 	vec4 yaxisNormal = texture(normalMap, posGS.xz);
 	vec4 zaxisNormal = texture(normalMap, posGS.xy);
 
-	vec4 tpTexNorm = xaxisNormal*blendPercent.x + yaxisNormal*blendPercent.y + zaxisNormal*blendPercent.z;
+	vec4 tpTexNorm = xaxisNormal*blendPercent.x + yaxisNormal*blendPercent.y + zaxisNormal*blendPercent.z;//tri-planer normal map
 	
 	if(Map == 0)
 	{

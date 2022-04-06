@@ -40,7 +40,7 @@ unsigned int TextureManager::createTexture(int height, int width)
 	return texture;
 }
 
-void TextureManager::drawTexture(unsigned int textureObj)
+void TextureManager::drawTexture(unsigned int textureObj)//draws texture to screen overlaying the scene
 {
 	textureDrawer->use();
 	glActiveTexture(GL_TEXTURE0);

@@ -22,7 +22,7 @@ struct Wave
 	float speed;
 };
 
-#define numWaves 1
+#define numWaves 4
 uniform Wave waves[numWaves];
 
 vec3 CalcGerstnerWaves(vec3 V, float amp, vec2 wavedir, float crestdist, float speed);

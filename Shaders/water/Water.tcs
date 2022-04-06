@@ -17,7 +17,7 @@ void main()
 	
 	float eyeToVertexDist0 = distance(viewPos, posVS[0]);
     float eyeToVertexDist1 = distance(viewPos, posVS[1]);
-    float eyeToVertexDist2 = distance(viewPos, posVS[2]);
+    float eyeToVertexDist2 = distance(viewPos, posVS[2]);//distance from each point
 	
 	// pass through position and normal information
 	posTC[gl_InvocationID]  = posVS[gl_InvocationID] ;
@@ -45,5 +45,5 @@ int getTessLevel(float eyeVertex1, float eyeVertex2)
     float k = 0.0065;//scaling factor for the distance
     tessLevel = int(c*pow(e,-distance*k));
     tessLevel = clamp(tessLevel, 1, 100);
-    return tessLevel;//tweak at end
+    return tessLevel;//exponential curve for tessellation
 }

@@ -32,7 +32,7 @@ void main()
 		
 		visibilityGS = visibilityES[i];
 		
-		gTBN = mat3(calcTangent(), calcBiTangent(), normalize(normalsES[i]));
+		gTBN = mat3(calcTangent(), calcBiTangent(), normalize(normalsES[i]));//TBN matrix more efficient here
 		EmitVertex();
 	}
 	

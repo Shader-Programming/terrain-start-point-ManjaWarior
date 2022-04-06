@@ -25,7 +25,7 @@ struct OutputPatch
     vec3 WorldPos_B210;
     vec3 WorldPos_B120;
     vec3 WorldPos_B111;
-};
+};//PN tirangles
 
 out patch OutputPatch oPatch;
 
@@ -56,7 +56,7 @@ void main()
           gl_TessLevelOuter[1] = getTessLevel(eyeToVertexDist2, eyeToVertexDist0) ; 
           gl_TessLevelOuter[2] = getTessLevel(eyeToVertexDist0, eyeToVertexDist1) ;//each of the edges calculated with each other
           gl_TessLevelInner[0] = (getTessLevel(eyeToVertexDist1, eyeToVertexDist2) + getTessLevel(eyeToVertexDist2, eyeToVertexDist0) + getTessLevel(eyeToVertexDist0, eyeToVertexDist1)) / 3; 
-   }
+   }//same tesselatation as for the terrain
 
 
 
@@ -72,7 +72,7 @@ int getTessLevel(float eyeVertex1, float eyeVertex2)
     float k = 0.0065;//scaling factor for the distance
     tessLevel = int(c*pow(e,-distance*k));
     tessLevel = clamp(tessLevel, 1, 100);
-    return tessLevel;//tweak at end
+    return tessLevel;
 }
 
 void CalcPositions()
@@ -116,7 +116,7 @@ void CalcPositions()
     oPatch.WorldPos_B111 = (oPatch.WorldPos_B021 + oPatch.WorldPos_B012 + oPatch.WorldPos_B102 +
                           oPatch.WorldPos_B201 + oPatch.WorldPos_B210 + oPatch.WorldPos_B120) / 6.0;
     oPatch.WorldPos_B111 += (oPatch.WorldPos_B111 - Center)/2 ;
-}
+}//PN triangle calculations
 
 vec3 ProjectToPlane(vec3 Point, vec3 PlanePoint, vec3 PlaneNormal)
 {
